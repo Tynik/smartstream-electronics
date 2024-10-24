@@ -6,7 +6,7 @@
     "sitemap": "tsc -p tsconfig.generators.json && tsc-alias -p tsconfig.generators.json && node generators/dist/generators/sitemap-generator.js",
     "products": "tsc -p tsconfig.generators.json && tsc-alias -p tsconfig.generators.json && node generators/dist/generators/products-generator.js",
     "build": "NODE_ENV=production webpack",
-    "deploy": "yarn run sitemap && yarn run products && yarn run build",
+    "deploy": "yarn run build",
     "start:netlify": "NODE_ENV=development netlify functions:serve",
     "start:app": "LOCAL_ENV=true NETLIFY_SERVER=http://localhost:9999 NODE_ENV=development webpack serve",
     "start": "yarn run start:netlify & yarn run start:app",
