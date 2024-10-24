@@ -1,0 +1,72 @@
+{
+  "name": "smartstream-electronics",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "scripts": {
+    "sitemap": "tsc -p tsconfig.generators.json && tsc-alias -p tsconfig.generators.json && node generators/dist/generators/sitemap-generator.js",
+    "products": "tsc -p tsconfig.generators.json && tsc-alias -p tsconfig.generators.json && node generators/dist/generators/products-generator.js",
+    "build": "NODE_ENV=production webpack",
+    "deploy": "yarn run sitemap && yarn run products && yarn run build",
+    "start:netlify": "NODE_ENV=development netlify functions:serve",
+    "start:app": "LOCAL_ENV=true NETLIFY_SERVER=http://localhost:9999 NODE_ENV=development webpack serve",
+    "start": "yarn run start:netlify & yarn run start:app",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@fontsource/roboto": "5.1.0",
+    "@mui/icons-material": "6.1.5",
+    "@mui/material": "6.1.5",
+    "@react-hive/honey-form": "2.0.0",
+    "@react-hive/honey-layout": "2.2.0",
+    "@tanstack/react-query": "4.36.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.27.0",
+    "styled-components": "6.1.13",
+    "csstype": "3.1.3"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-runtime": "7.25.9",
+    "@babel/preset-env": "7.25.9",
+    "@babel/preset-typescript": "7.25.9",
+    "@netlify/functions": "2.8.2",
+    "@netlify/blobs": "8.1.0",
+    "@types/jest": "29.5.14",
+    "@types/node": "22.7.9",
+    "@types/react-dom": "18.3.1",
+    "@types/styled-components": "5.1.34",
+    "@typescript-eslint/eslint-plugin": "7.18.0",
+    "@typescript-eslint/parser": "7.18.0",
+    "eslint": "8.57.0",
+    "eslint-config-airbnb": "19.0.4",
+    "eslint-config-airbnb-typescript": "18.0.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-prettier": "5.2.1",
+    "eslint-plugin-jsx-a11y": "6.10.1",
+    "eslint-plugin-react": "7.37.2",
+    "copy-webpack-plugin": "12.0.2",
+    "css-loader": "7.1.2",
+    "html-webpack-plugin": "5.6.3",
+    "netlify-cli": "17.37.1",
+    "prettier": "3.3.3",
+    "sass": "1.80.4",
+    "sass-loader": "16.0.2",
+    "stripe": "17.2.1",
+    "style-loader": "4.0.0",
+    "ts-loader": "9.5.1",
+    "ts-node": "10.9.2",
+    "tsc-alias": "1.8.10",
+    "typescript": "5.6.3",
+    "webpack": "5.95.0",
+    "webpack-cli": "5.1.4",
+    "webpack-dev-server": "5.1.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "**/src/**/__tests__/**/*.tsx"
+    ]
+  }
+}

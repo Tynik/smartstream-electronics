@@ -1,0 +1,14 @@
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/assets/images/*"
+  to = "/.netlify/images?url=/assets/images/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/assets/photos/*"
+  to = "/.netlify/images?url=/assets/photos/:splat"
+  status = 200

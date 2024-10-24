@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "ESNext"
+    ],
+    "outDir": "generators/dist",
+    "jsx": "react",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "paths": {
+      "~/*": [
+        "./src/*"
+      ]
+    }
+  },
+  "include": [
+    "./generators/sitemap-generator.ts",
+    "./generators/products-generator.ts"
+  ]
+}
