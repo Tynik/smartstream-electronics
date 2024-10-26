@@ -11,11 +11,12 @@ type NetlifyRequestOptions<Payload> = {
   payload?: Payload;
   method?: HTTPRequestMethod;
   params?: Record<string, string | number>;
+  request?: RequestInit;
 };
 
 export const netlifyRequest = async <Response, Payload = unknown>(
   funcName: NetlifyFunction,
-  { payload, method = 'GET', params = {} }: NetlifyRequestOptions<Payload> = {},
+  { payload, method = 'GET', params = {}, request }: NetlifyRequestOptions<Payload> = {},
 ): Promise<NetlifyRequestResponse<Response>> => {
   let body: BodyInit | null = null;
 
@@ -39,10 +40,10 @@ export const netlifyRequest = async <Response, Payload = unknown>(
     {
       method,
       body,
-      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
+      ...request,
     },
   );
 

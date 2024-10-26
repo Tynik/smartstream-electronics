@@ -115,11 +115,15 @@ const createResponse = <Data>(
     body: JSON.stringify(data),
     headers: {
       'Access-Control-Allow-Origin': SITE_DOMAIN,
-      'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Allow-Methods': allowMethods?.join(', ') ?? '*',
       ...headers,
-      ...(setCookieHeaders.length ? { 'Set-Cookie': setCookieHeaders as unknown as string } : {}),
+      ...(setCookieHeaders.length
+        ? {
+            'Access-Control-Allow-Credentials': 'true',
+            'Set-Cookie': setCookieHeaders as unknown as string,
+          }
+        : {}),
     },
   };
 };

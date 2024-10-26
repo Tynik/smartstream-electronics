@@ -15,6 +15,9 @@ export const App = () => {
           page: 1,
           pageSize: 25,
         },
+        request: {
+          credentials: 'include',
+        },
       }),
   });
 
