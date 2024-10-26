@@ -5,7 +5,14 @@ import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
 
 import type { Nullable } from './netlify.types';
-import { SECRET_KEY, SITE_DOMAIN, STRIPE_API_KEY } from './netlify.constants';
+import {
+  IS_LOCAL_ENV,
+  NETLIFY_TOKEN,
+  SECRET_KEY,
+  SITE_DOMAIN,
+  SITE_ID,
+  STRIPE_API_KEY,
+} from './netlify.constants';
 
 type HTTPMethod = 'POST' | 'GET' | 'OPTIONS' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -189,8 +196,8 @@ export const createHandler = <Payload = unknown>(
 export const getNetlifyStore = (options: Omit<GetStoreOptions, 'siteID' | 'token'>): Store =>
   getStore({
     ...options,
-    siteID: process.env.SITE_ID,
-    token: process.env.NETLIFY_TOKEN,
+    siteID: SITE_ID,
+    token: IS_LOCAL_ENV ? NETLIFY_TOKEN : undefined,
     consistency: 'eventual',
   });
 
