@@ -48,85 +48,81 @@ type CookieOptions = {
   sameSite?: 'Strict' | 'Lax' | 'None';
 };
 
+const formatCookie = ({
+  name,
+  domain,
+  value,
+  path = '/',
+  expires,
+  maxAge,
+  secure,
+  partitioned,
+  httpOnly = true,
+  sameSite,
+}: CookieOptions) => {
+  let cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
+
+  if (path) {
+    cookie += `; Path=${path}`;
+  }
+
+  if (domain) {
+    cookie += `; Domain=${domain}`;
+  }
+
+  if (expires) {
+    cookie += `; Expires=${expires.toUTCString()}`;
+  }
+
+  if (maxAge !== undefined) {
+    cookie += `; Max-Age=${maxAge}`;
+  }
+
+  if (partitioned) {
+    cookie += '; Partitioned';
+  }
+
+  if (httpOnly) {
+    cookie += '; HttpOnly';
+  }
+
+  if (sameSite) {
+    cookie += `; SameSite=${sameSite}`;
+  }
+
+  if (secure || sameSite === 'None') {
+    cookie += '; Secure';
+  }
+
+  return cookie;
+};
+
 type CreateResponseOptions = {
   statusCode?: number;
   allowMethods?: HTTPMethod[] | null;
   headers?: Record<string, string>;
-  cookies?: CookieOptions[];
+  cookie?: CookieOptions;
 };
 
 const createResponse = <Data>(
   data: Data,
-  { statusCode = 200, allowMethods = null, headers = {}, cookies = [] }: CreateResponseOptions = {},
-): HandlerResponse => {
-  const formatCookie = ({
-    name,
-    domain,
-    value,
-    path = '/',
-    expires,
-    maxAge,
-    secure,
-    partitioned,
-    httpOnly = true,
-    sameSite,
-  }: CookieOptions) => {
-    let cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
-
-    if (path) {
-      cookie += `; Path=${path}`;
-    }
-
-    if (domain) {
-      cookie += `; Domain=${domain}`;
-    }
-
-    if (expires) {
-      cookie += `; Expires=${expires.toUTCString()}`;
-    }
-
-    if (maxAge !== undefined) {
-      cookie += `; Max-Age=${maxAge}`;
-    }
-
-    if (partitioned) {
-      cookie += '; Partitioned';
-    }
-
-    if (httpOnly) {
-      cookie += '; HttpOnly';
-    }
-
-    if (sameSite) {
-      cookie += `; SameSite=${sameSite}`;
-    }
-
-    if (secure || sameSite === 'None') {
-      cookie += '; Secure';
-    }
-
-    return cookie;
-  };
-
-  const setCookieHeaders = cookies.map(formatCookie);
-
-  return {
-    statusCode,
-    body: JSON.stringify(data),
-    headers: {
-      'Access-Control-Allow-Origin': SITE_DOMAIN,
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Allow-Methods': allowMethods?.join(', ') ?? '*',
-      ...headers,
-      ...(setCookieHeaders.length
-        ? {
-            'Access-Control-Allow-Credentials': 'true',
-            'Set-Cookie': setCookieHeaders as unknown as string,
-          }
-        : {}),
-    },
-  };
-};
+  { statusCode = 200, allowMethods = null, headers = {}, cookie }: CreateResponseOptions = {},
+): HandlerResponse => ({
+  statusCode,
+  body: JSON.stringify(data),
+  headers: {
+    'Access-Control-Allow-Origin': SITE_DOMAIN,
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': allowMethods?.join(', ') ?? '*',
+    ...headers,
+    ...(cookie
+      ? {
+          'Set-Cookie': formatCookie(cookie),
+        }
+      : {}),
+  },
+});
 
 type CreateHandlerFunctionOptions<Payload = unknown> = {
   event: HandlerEvent;
@@ -146,7 +142,7 @@ type CreateHandlerFunction<Payload, Response = unknown> = (
     status: 'ok' | 'error';
     statusCode?: number;
     headers?: Record<string, string>;
-    cookies?: CookieOptions[];
+    cookie?: CookieOptions;
   }>
 >;
 
@@ -173,13 +169,13 @@ export const createHandler = <Payload = unknown>(
       const payload =
         event.body && !event.isBase64Encoded ? (JSON.parse(event.body) as Payload) : null;
 
-      const { statusCode, headers, cookies, ...result } =
+      const { statusCode, headers, cookie, ...result } =
         (await fn({ event, context, payload })) || {};
 
       return createResponse(result, {
         statusCode,
         headers,
-        cookies,
+        cookie,
         allowMethods: options?.allowMethods,
       });
     } catch (e) {
