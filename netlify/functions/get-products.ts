@@ -45,13 +45,5 @@ export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }
   return {
     status: 'ok',
     data: productRecords,
-    cookies: [
-      {
-        name: 'sessionId',
-        value: 'abc123',
-        maxAge: 3600,
-        sameSite: IS_LOCAL_ENV ? 'None' : 'Strict',
-      },
-    ],
   };
 });

@@ -40,6 +40,9 @@ export const netlifyRequest = async <Response, Payload = unknown>(
       method,
       body,
       credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
   );
 
