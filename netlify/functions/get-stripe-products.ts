@@ -1,15 +1,19 @@
 import Stripe from 'stripe';
 
-import type { StripeProductPrices } from '../helpers';
-import { getStripeProductPricesList } from '../helpers';
-
-import { createHandler, initStripeClient, processProductPrices } from '../helpers';
+import type { StripeProductPrices } from '../netlify.helpers';
+import {
+  createHandler,
+  initStripeClient,
+  processProductPrices,
+  getStripeProductPricesList,
+} from '../netlify.helpers';
 
 export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }) => {
   const productIds = event.queryStringParameters?.ids?.split(',');
   if (!productIds) {
     return {
       status: 'error',
+      statusCode: 400,
       data: {
         error: 'Product IDs are missed',
       },

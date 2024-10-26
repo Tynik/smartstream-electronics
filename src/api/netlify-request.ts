@@ -1,6 +1,6 @@
 import type { HTTPRequestMethod } from '~/types';
 
-export type NetlifyFunction = 'get-product' | 'get-products' | 'checkout' | 'confirm-order';
+export type NetlifyFunction = 'get-product' | 'get-products';
 
 export type NetlifyRequestResponse<Response> = {
   status: string;
@@ -10,7 +10,7 @@ export type NetlifyRequestResponse<Response> = {
 type NetlifyRequestOptions<Payload> = {
   payload?: Payload;
   method?: HTTPRequestMethod;
-  params?: Record<string, string>;
+  params?: Record<string, string | number>;
 };
 
 export const netlifyRequest = async <Response, Payload = unknown>(
@@ -26,13 +26,20 @@ export const netlifyRequest = async <Response, Payload = unknown>(
     body = JSON.stringify(payload);
   }
 
-  const queryParams = new URLSearchParams(params).toString();
+  const queryParams = new URLSearchParams(
+    Object.entries(params).reduce<Record<string, string>>((acc, [key, value]) => {
+      acc[key] = String(value);
+
+      return acc;
+    }, {}),
+  ).toString();
 
   const response = await fetch(
     `${process.env.NETLIFY_SERVER || ''}/.netlify/functions/${funcName}?${queryParams}`,
     {
       method,
       body,
+      credentials: 'include',
     },
   );
 
