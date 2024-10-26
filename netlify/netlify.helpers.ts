@@ -6,7 +6,6 @@ import crypto from 'crypto';
 
 import type { Nullable } from './netlify.types';
 import {
-  IS_LOCAL_ENV,
   NETLIFY_TOKEN,
   SECRET_KEY,
   SITE_DOMAIN,
@@ -197,7 +196,7 @@ export const getNetlifyStore = (options: Omit<GetStoreOptions, 'siteID' | 'token
   getStore({
     ...options,
     siteID: SITE_ID,
-    token: IS_LOCAL_ENV ? NETLIFY_TOKEN : undefined,
+    token: NETLIFY_TOKEN,
     consistency: 'eventual',
   });
 
