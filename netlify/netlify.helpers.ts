@@ -2,7 +2,7 @@ import type { Handler, HandlerResponse, HandlerEvent, HandlerContext } from '@ne
 import crypto from 'crypto';
 
 import type { Nullable } from './netlify.types';
-import { NETLIFY_EMAILS_SECRET, SECRET_KEY, SITE_DOMAIN } from './netlify.constants';
+import { URL, NETLIFY_EMAILS_SECRET, SECRET_KEY, SITE_DOMAIN } from './netlify.constants';
 
 type HTTPMethod = 'POST' | 'GET' | 'OPTIONS' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -190,7 +190,7 @@ export const createHandler = <Payload = unknown>(
 type SendEmailOptions = {
   to: string;
   subject: string;
-  parameters: Record<string, string>;
+  parameters: Record<string, string | undefined>;
 };
 
 export const sendEmail = (
@@ -199,7 +199,7 @@ export const sendEmail = (
 ) => {
   assert(NETLIFY_EMAILS_SECRET, 'The `NETLIFY_EMAILS_SECRET` must be set as environment variable');
 
-  return fetch(`${process.env.URL}/.netlify/functions/emails/${emailTemplate}`, {
+  return fetch(`${URL}/.netlify/functions/emails/${emailTemplate}`, {
     method: 'POST',
     headers: {
       'netlify-emails-secret': NETLIFY_EMAILS_SECRET,

@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Nullable, UserRecord } from '../netlify.types';
+import { URL } from '../netlify.constants';
 import { createHandler, hashPassword, sendEmail } from '../netlify.helpers';
 import { getNetlifyStore } from '../netlify-store.helpers';
 import { createSignUpConfirmationToken } from '../netlify-auth.helpers';
@@ -49,6 +50,7 @@ export const handler = createHandler<SignupPayload>(
         subject: 'Confirm Your Registration with SmartStream Electronics',
         parameters: {
           name: `${payload.firstName} ${payload.lastName}`,
+          url: URL,
           confirmationToken: createSignUpConfirmationToken({
             firstName: payload.firstName,
             lastName: payload.lastName,
