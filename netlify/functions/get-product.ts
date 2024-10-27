@@ -1,5 +1,6 @@
 import type { Nullable, ProductRecord } from '../netlify.types';
-import { createHandler, getNetlifyStore } from '../netlify.helpers';
+import { createHandler } from '../netlify.helpers';
+import { getNetlifyStore } from '../netlify-store.helpers';
 
 export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }) => {
   const productId = event.queryStringParameters?.productId;

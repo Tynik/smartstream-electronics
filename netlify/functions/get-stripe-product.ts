@@ -1,9 +1,9 @@
+import { createHandler } from '../netlify.helpers';
 import {
-  createHandler,
   getStripeProductPricesList,
   initStripeClient,
   processProductPrices,
-} from '../netlify.helpers';
+} from '../netlify-stripe.helpers';
 
 export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }) => {
   const productId = event.queryStringParameters?.productId;

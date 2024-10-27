@@ -1,12 +1,15 @@
 import React from 'react';
 import { HoneyBox } from '@react-hive/honey-layout';
+import { useNavigate } from 'react-router-dom';
 
-import { MenuIcon } from '~/icons';
+import { MenuIcon, PersonIcon } from '~/icons';
 import { useCurrentApp } from '~/providers';
 
 import { IconButton } from './IconButton';
 
 export const TopBar = () => {
+  const navigate = useNavigate();
+
   const { toggleMenu } = useCurrentApp();
 
   return (
@@ -21,6 +24,10 @@ export const TopBar = () => {
     >
       <IconButton onClick={toggleMenu}>
         <MenuIcon $color="white" />
+      </IconButton>
+
+      <IconButton onClick={() => navigate('sign-in')} $marginLeft="auto">
+        <PersonIcon $color="white" />
       </IconButton>
     </HoneyBox>
   );

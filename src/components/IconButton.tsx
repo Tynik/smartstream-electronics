@@ -1,6 +1,9 @@
 import styled from 'styled-components';
+import { HoneyBox } from '@react-hive/honey-layout';
 
-export const IconButton = styled.button`
+export const IconButton = styled(HoneyBox).attrs({
+  as: 'button',
+})`
   display: flex;
   align-items: center;
   justify-content: center;

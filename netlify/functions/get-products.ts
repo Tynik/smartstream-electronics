@@ -1,6 +1,6 @@
 import type { ProductRecord } from '../netlify.types';
-import { createHandler, getNetlifyStoreRecords, getNetlifyStore } from '../netlify.helpers';
-import { IS_LOCAL_ENV } from '../netlify.constants';
+import { createHandler } from '../netlify.helpers';
+import { getNetlifyStore, getNetlifyStoreRecords } from '../netlify-store.helpers';
 
 export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }) => {
   const categoryId = event.queryStringParameters?.categoryId;
@@ -45,12 +45,5 @@ export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }
   return {
     status: 'ok',
     data: productRecords,
-    cookie: {
-      name: 'authToken',
-      value: 'test',
-      maxAge: 3600,
-      sameSite: IS_LOCAL_ENV ? 'None' : 'Strict',
-      secure: true,
-    },
   };
 });

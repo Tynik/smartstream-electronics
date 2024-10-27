@@ -32,6 +32,8 @@ export type StripeProductId = Stripe.Product['id'];
 
 export type OrderId = string;
 
+export type UserRole = 'admin' | 'buyer';
+
 export type UserStatus = 'active' | 'inactive';
 
 export type OrderStatus = 'pending' | 'processed' | 'canceled' | 'archived';
@@ -39,6 +41,7 @@ export type OrderStatus = 'pending' | 'processed' | 'canceled' | 'archived';
 export type UserRecord = {
   id: UserId;
   stripeCustomerId: Nullable<StripeCustomerId>;
+  role: UserRole;
   firstName: Nullable<string>;
   lastName: Nullable<string>;
   email: string;

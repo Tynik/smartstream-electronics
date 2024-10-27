@@ -6,20 +6,22 @@ type VerifyTokenPayload = {
 };
 
 export const handler = createHandler<VerifyTokenPayload>(
-  { allowMethods: ['POST'] },
-  async ({ payload }) => {
-    if (!payload) {
+  { allowMethods: ['GET'] },
+  async ({ cookies }) => {
+    console.log(process.env);
+
+    if (!cookies.authToken) {
       return {
         status: 'error',
         statusCode: 400,
         data: {
-          error: 'Payload is empty',
+          error: 'The token is not provided',
         },
       };
     }
 
     try {
-      verifyAuthToken(payload.token);
+      verifyAuthToken(cookies.authToken);
 
       return {
         status: 'ok',

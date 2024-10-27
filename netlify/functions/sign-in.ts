@@ -1,6 +1,8 @@
 import type { Nullable, UserRecord } from '../netlify.types';
-import { createHandler, getNetlifyStore, hashPassword } from '../netlify.helpers';
+import { createHandler, hashPassword } from '../netlify.helpers';
 import { createAuthToken } from '../netlify-auth.helpers';
+import { getNetlifyStore } from '../netlify-store.helpers';
+import { IS_LOCAL_ENV } from '../netlify.constants';
 
 type LoginPayload = {
   email: string;
@@ -54,8 +56,13 @@ export const handler = createHandler<LoginPayload>(
 
     return {
       status: 'ok',
-      data: {
-        token: authToken,
+      data: {},
+      cookie: {
+        name: 'authToken',
+        value: authToken,
+        maxAge: 3600,
+        sameSite: IS_LOCAL_ENV ? 'None' : 'Strict',
+        secure: true,
       },
     };
   },

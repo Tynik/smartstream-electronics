@@ -1,17 +1,8 @@
-import Stripe from 'stripe';
 import type { Handler, HandlerResponse, HandlerEvent, HandlerContext } from '@netlify/functions';
-import type { GetStoreOptions, Store, ListOptions } from '@netlify/blobs';
-import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
 
 import type { Nullable } from './netlify.types';
-import {
-  NETLIFY_TOKEN,
-  SECRET_KEY,
-  SITE_DOMAIN,
-  SITE_ID,
-  STRIPE_API_KEY,
-} from './netlify.constants';
+import { NETLIFY_EMAILS_SECRET, SECRET_KEY, SITE_DOMAIN } from './netlify.constants';
 
 type HTTPMethod = 'POST' | 'GET' | 'OPTIONS' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -25,14 +16,6 @@ export const hashPassword = (password: string): string => {
   assert(SECRET_KEY, 'The `SECRET_KEY` must be set as environment variable');
 
   return crypto.createHmac('sha256', SECRET_KEY).update(password).digest('hex');
-};
-
-export const initStripeClient = (): Stripe => {
-  assert(STRIPE_API_KEY, 'The `STRIPE_API_KEY` must be set as environment variable');
-
-  return new Stripe(STRIPE_API_KEY, {
-    apiVersion: '2024-09-30.acacia',
-  });
 };
 
 type CookieOptions = {
@@ -127,6 +110,7 @@ const createResponse = <Data>(
 type CreateHandlerFunctionOptions<Payload = unknown> = {
   event: HandlerEvent;
   context: HandlerContext;
+  cookies: Record<string, string>;
   payload: Payload | null;
 };
 
@@ -166,11 +150,22 @@ export const createHandler = <Payload = unknown>(
     }
 
     try {
+      const cookieHeader = event.headers.cookie || event.headers.Cookie;
+
+      const cookies: Record<string, string> = {};
+      if (cookieHeader) {
+        cookieHeader.split('; ').forEach(cookie => {
+          const [name, value] = cookie.split('=');
+
+          cookies[decodeURIComponent(name.trim())] = decodeURIComponent(value.trim());
+        });
+      }
+
       const payload =
         event.body && !event.isBase64Encoded ? (JSON.parse(event.body) as Payload) : null;
 
       const { statusCode, headers, cookie, ...result } =
-        (await fn({ event, context, payload })) || {};
+        (await fn({ event, context, cookies, payload })) || {};
 
       return createResponse(result, {
         statusCode,
@@ -192,104 +187,24 @@ export const createHandler = <Payload = unknown>(
   };
 };
 
-export const getNetlifyStore = (options: Omit<GetStoreOptions, 'siteID' | 'token'>): Store =>
-  getStore({
-    ...options,
-    siteID: SITE_ID,
-    token: NETLIFY_TOKEN,
-    consistency: 'eventual',
+type SendEmailOptions = {
+  to: string;
+  parameters: Record<string, string>;
+};
+
+export const sendEmail = (emailTemplate: string, { to, parameters }: SendEmailOptions) => {
+  assert(NETLIFY_EMAILS_SECRET, 'The `NETLIFY_EMAILS_SECRET` must be set as environment variable');
+
+  return fetch(`${process.env.URL}/.netlify/functions/emails/${emailTemplate}`, {
+    method: 'POST',
+    headers: {
+      'netlify-emails-secret': NETLIFY_EMAILS_SECRET,
+    },
+    body: JSON.stringify({
+      to,
+      parameters,
+      from: 'no-reply@smartstream-electronics.co.uk',
+      subject: "You've been registered",
+    }),
   });
-
-type StripeShippingRates = {
-  minimumWeightThreshold: number;
-};
-
-export const getStripeAllowableShippingRates = async (
-  stripe: Stripe,
-  { minimumWeightThreshold }: StripeShippingRates,
-): Promise<Stripe.ShippingRate[]> => {
-  const { data: shippingRates } = await stripe.shippingRates.list({
-    active: true,
-    limit: 100,
-  });
-
-  return shippingRates.filter(
-    shippingRate =>
-      +shippingRate.metadata.minWeight <= minimumWeightThreshold &&
-      (!shippingRate.metadata.maxWeight ||
-        +shippingRate.metadata.maxWeight >= minimumWeightThreshold),
-  );
-};
-
-export const getStripeProductsList = async (stripe: Stripe): Promise<Stripe.Product[]> => {
-  const { data: products } = await stripe.products.list({
-    active: true,
-    limit: 100,
-  });
-
-  return products;
-};
-
-export const getStripeProductPricesList = async (
-  stripe: Stripe,
-  productId: Stripe.Product['id'],
-): Promise<Stripe.Price[]> => {
-  const { data: prices } = await stripe.prices.list({
-    product: productId,
-    active: true,
-    limit: 100,
-  });
-
-  return prices;
-};
-
-export const findStripeCustomer = async (
-  stripe: Stripe,
-  email: string,
-): Promise<Stripe.Customer> => {
-  const { data } = await stripe.customers.list({
-    email,
-    limit: 1,
-  });
-
-  return data[0];
-};
-
-export type StripeProductPrices = Record<
-  Stripe.Price['id'],
-  {
-    amount: number;
-    quantity: number;
-  }
->;
-
-export const processProductPrices = (prices: Stripe.Price[]): StripeProductPrices =>
-  prices.reduce<StripeProductPrices>((resultPrices, price) => {
-    resultPrices[price.id] = {
-      amount: price.active ? (price.unit_amount ?? 0) / 100 : 0,
-      quantity: +(price.metadata.quantity ?? 0),
-    };
-
-    return resultPrices;
-  }, {});
-
-type GetNetlifyStoreRecordsOptions = {
-  offset?: number;
-  limit?: number;
-};
-
-export const getNetlifyStoreRecordsByKeys = async <T>(store: Store, keys: string[]) =>
-  (await Promise.all(
-    keys.map(key => store.get(key, { type: 'json', consistency: 'eventual' })),
-  )) as T[];
-
-export const getNetlifyStoreRecords = async <T>(
-  store: Store,
-  listOptions: Omit<ListOptions, 'paginate'>,
-  { offset = 0, limit = 1000 }: GetNetlifyStoreRecordsOptions = {},
-) => {
-  const listResult = await store.list(listOptions);
-  const keys = listResult.blobs.slice(offset, offset + limit).map(blob => blob.key);
-
-  return getNetlifyStoreRecordsByKeys<T>(store, keys);
 };

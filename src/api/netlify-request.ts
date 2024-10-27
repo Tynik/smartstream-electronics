@@ -1,6 +1,11 @@
 import type { HTTPRequestMethod } from '~/types';
 
-export type NetlifyFunction = 'get-product' | 'get-products';
+export type NetlifyFunction =
+  | 'get-product'
+  | 'get-products'
+  | 'sign-in'
+  | 'sign-up'
+  | 'verify-auth-token';
 
 export type NetlifyRequestResponse<Response> = {
   status: string;
@@ -40,6 +45,7 @@ export const netlifyRequest = async <Response, Payload = unknown>(
     {
       method,
       body,
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },

@@ -1,12 +1,12 @@
 import Stripe from 'stripe';
 
-import type { StripeProductPrices } from '../netlify.helpers';
+import type { StripeProductPrices } from '../netlify-stripe.helpers';
+import { createHandler } from '../netlify.helpers';
 import {
-  createHandler,
+  getStripeProductPricesList,
   initStripeClient,
   processProductPrices,
-  getStripeProductPricesList,
-} from '../netlify.helpers';
+} from '../netlify-stripe.helpers';
 
 export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }) => {
   const productIds = event.queryStringParameters?.ids?.split(',');

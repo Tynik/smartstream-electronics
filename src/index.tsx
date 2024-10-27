@@ -3,7 +3,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HoneyLayoutProvider } from '@react-hive/honey-layout';
+import { StyleSheetManager } from 'styled-components';
 
+import { shouldForwardProp } from '~/helpers';
 import { theme } from '~/theme';
 import { GlobalStyle } from '~/global-style';
 import { App } from '~/App';
@@ -13,7 +15,7 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-const root = createRoot(document.getElementById('app') as HTMLDivElement);
+const root = createRoot(document.getElementById('root') as HTMLDivElement);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,10 +40,12 @@ const router = createBrowserRouter([
 
 root.render(
   <HoneyLayoutProvider theme={theme}>
-    <GlobalStyle />
+    <StyleSheetManager shouldForwardProp={shouldForwardProp}>
+      <GlobalStyle />
 
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </StyleSheetManager>
   </HoneyLayoutProvider>,
 );

@@ -37,7 +37,20 @@ export const GlobalStyle = createGlobalStyle`
       box-sizing: inherit;
     }
 
+    *:focus {
+      outline: none;
+    }
+
     #root {
+      display: flex;
+      flex-direction: column;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    form {
       display: flex;
       flex-direction: column;
     }

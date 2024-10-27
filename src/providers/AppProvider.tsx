@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import type { PropsWithChildren } from 'react';
+import { useQuery } from '@tanstack/react-query';
+
+import { netlifyRequest } from '~/api';
 
 type AppContextValue = {
   isOpenMenu: boolean;
@@ -10,6 +13,11 @@ const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export const AppProvider = ({ children }: PropsWithChildren) => {
   const [isOpenMenu, setIsOpenMenu] = useState(true);
+
+  const { isFetching, isError } = useQuery({
+    queryKey: ['verify-auth-token'],
+    queryFn: () => netlifyRequest('verify-auth-token'),
+  });
 
   const contextValue = useMemo<AppContextValue>(
     () => ({
