@@ -107,7 +107,7 @@ const createResponse = <Data>(
   },
 });
 
-type CreateHandlerFunctionOptions<Payload = unknown> = {
+export type CreateHandlerFunctionOptions<Payload = unknown> = {
   event: HandlerEvent;
   context: HandlerContext;
   cookies: Record<string, string>;
@@ -118,7 +118,7 @@ type CreateHandlerOptions = {
   allowMethods?: HTTPMethod[];
 } | null;
 
-type CreateHandlerFunction<Payload, Response = unknown> = (
+export type CreateHandlerFunction<Payload, Response = unknown> = (
   options: CreateHandlerFunctionOptions<Payload>,
 ) => Promise<
   Nullable<{
@@ -194,7 +194,7 @@ type SendEmailOptions = {
 };
 
 export const sendEmail = (
-  emailTemplate: 'sign-up-confirmation',
+  emailTemplate: 'email-confirmation',
   { subject, to, parameters }: SendEmailOptions,
 ) => {
   assert(NETLIFY_EMAILS_SECRET, 'The `NETLIFY_EMAILS_SECRET` must be set as environment variable');

@@ -1,11 +1,11 @@
-import type { Nullable, UserRecord } from '../netlify.types';
+import type { ConfirmEmailTokenPayload, Nullable, UserRecord } from '../netlify.types';
 import { createHandler } from '../netlify.helpers';
 import { getNetlifyStore } from '../netlify-store.helpers';
-import { verifyToken } from '../netlify-auth.helpers';
+import { verifyToken } from '../netlify-crypto.helpers';
 
 export const handler = createHandler({ allowMethods: ['POST'] }, async ({ event }) => {
-  const confirmationToken = event.queryStringParameters?.confirmationToken;
-  if (!confirmationToken) {
+  const token = event.queryStringParameters?.token;
+  if (!token) {
     return {
       status: 'error',
       statusCode: 400,
@@ -16,12 +16,7 @@ export const handler = createHandler({ allowMethods: ['POST'] }, async ({ event 
   }
 
   try {
-    const tokenPayload = verifyToken<{
-      firstName: string;
-      lastName: string;
-      email: string;
-      phone: Nullable<string>;
-    }>(confirmationToken);
+    const tokenPayload = verifyToken<ConfirmEmailTokenPayload>(token);
 
     const usersStore = getNetlifyStore({
       name: 'users',

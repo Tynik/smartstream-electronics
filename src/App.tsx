@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 import { HoneyBox } from '@react-hive/honey-layout';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,7 +10,7 @@ import type { Nullable } from '~/types';
 import { SIGN_IN_ROUTE_PATH, SIGN_UP_ROUTE_PATH } from '~/constants';
 import { AppProvider } from '~/providers';
 import { Container, Menu, MENU_WIDTH, TopBar } from '~/components';
-import { SignInPage, SignUpConfirmationPage, SignUpPage } from '~/pages';
+import { SignInPage, EmailConfirmationPage, SignUpPage } from '~/pages';
 
 export const App = () => {
   const location = useLocation();
@@ -26,7 +26,7 @@ export const App = () => {
 
   return (
     <AppProvider>
-      {({ isOpenMenu }) => (
+      {({ accountProfile, isOpenMenu }) => (
         <>
           <TopBar />
 
@@ -55,9 +55,15 @@ export const App = () => {
             >
               <Container>
                 <Routes>
-                  <Route path={SIGN_UP_ROUTE_PATH} element={<SignUpPage />} />
-                  <Route path={SIGN_IN_ROUTE_PATH} element={<SignInPage />} />
-                  <Route path="/account/confirm" element={<SignUpConfirmationPage />} />
+                  {!accountProfile && (
+                    <>
+                      <Route path={SIGN_UP_ROUTE_PATH} element={<SignUpPage />} />
+                      <Route path={SIGN_IN_ROUTE_PATH} element={<SignInPage />} />
+                      <Route path="/email/confirm" element={<EmailConfirmationPage />} />
+                    </>
+                  )}
+
+                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Container>
             </HoneyBox>

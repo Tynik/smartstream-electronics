@@ -2,7 +2,7 @@ import React from 'react';
 import type { HoneyFormFieldsConfig, HoneyFormOnSubmit } from '@react-hive/honey-form';
 import { HoneyForm } from '@react-hive/honey-form';
 import { HoneyBox, HoneyFlexBox } from '@react-hive/honey-layout';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import { SIGN_UP_ROUTE_PATH } from '~/constants';
 import { handlerApiError, netlifyRequest } from '~/api';
@@ -30,6 +30,8 @@ const SIGN_IN_FORM_FIELDS: HoneyFormFieldsConfig<SignInFormData> = {
 };
 
 export const SignInPage = () => {
+  const navigate = useNavigate();
+
   const handleSignIn: HoneyFormOnSubmit<SignInFormData> = async data => {
     try {
       await netlifyRequest('sign-in', {
@@ -39,6 +41,8 @@ export const SignInPage = () => {
           password: data.password,
         },
       });
+
+      navigate('/');
     } catch (e) {
       handlerApiError(e);
     }

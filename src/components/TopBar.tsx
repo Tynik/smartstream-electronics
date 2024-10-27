@@ -1,20 +1,24 @@
 import React from 'react';
 import { HoneyBox } from '@react-hive/honey-layout';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
-import { SIGN_IN_ROUTE_PATH } from '~/constants';
+import { ACCOUNT_PROFILE_QUERY_KEY, SIGN_IN_ROUTE_PATH } from '~/constants';
 import { LogoutIcon, MenuIcon, PersonIcon } from '~/icons';
 import { useCurrentApp } from '~/providers';
 
 import { IconButton } from './IconButton';
 
 export const TopBar = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const { accountProfile, toggleMenu } = useCurrentApp();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+
+    await queryClient.resetQueries({ queryKey: ACCOUNT_PROFILE_QUERY_KEY });
 
     navigate(SIGN_IN_ROUTE_PATH);
   };

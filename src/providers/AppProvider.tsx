@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import type { PropsWithChildren, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 import type { AccountProfile, NetlifyRequestResponse } from '~/api';
-import { SIGN_IN_ROUTE_PATH } from '~/constants';
+import { ACCOUNT_PROFILE_QUERY_KEY, SIGN_IN_ROUTE_PATH } from '~/constants';
 import { getAccountProfile, netlifyRequest } from '~/api';
 import { getCookieValue } from '~/helpers';
 
@@ -42,14 +42,14 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         }
       }
 
-      return Promise.reject(new Error());
+      return Promise.reject(null);
     },
     refetchInterval: 900000, // 15 minutes
     enabled: Boolean(authToken),
   });
 
-  const { data: accountProfile, isFetching: isAccountProfileFetching } = useQuery({
-    queryKey: ['account-profile'],
+  const { data: accountProfile, isInitialLoading: isAccountProfileLoading } = useQuery({
+    queryKey: ACCOUNT_PROFILE_QUERY_KEY,
     queryFn: getAccountProfile,
     enabled: Boolean(authToken),
   });

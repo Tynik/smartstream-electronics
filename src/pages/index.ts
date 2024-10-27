@@ -1,3 +1,3 @@
 export * from './SignInPage';
 export * from './SignUpPage';
-export * from './SignUpConfirmationPage';
+export * from './EmailConfirmationPage';

@@ -1,43 +1,39 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import type { CreateHandlerFunction, CreateHandlerFunctionOptions } from './netlify.helpers';
+import { verifyToken } from './netlify-crypto.helpers';
+import type { AuthTokenPayload } from './netlify.types';
 
-import { SECRET_KEY } from './netlify.constants';
-import { assert } from './netlify.helpers';
+export const withCredentials = <Payload = unknown>(
+  fn: (
+    options: CreateHandlerFunctionOptions<Payload> & {
+      tokenPayload: AuthTokenPayload;
+    },
+  ) => ReturnType<CreateHandlerFunction<Payload>>,
+): CreateHandlerFunction<Payload> => {
+  return async options => {
+    const { cookies } = options;
 
-const AUTH_TOKEN_EXPIRATION = '1h';
-const SIGN_UP_CONFIRMATION_TOKEN_EXPIRATION = '30m';
+    if (!cookies.authToken) {
+      return {
+        status: 'error',
+        statusCode: 400,
+        data: {
+          error: 'The token is not provided',
+        },
+      };
+    }
 
-type CreateAuthTokenOptions = {
-  email: string;
-};
+    try {
+      const tokenPayload = verifyToken<AuthTokenPayload>(cookies.authToken);
 
-export const createAuthToken = ({ email }: CreateAuthTokenOptions) => {
-  assert(SECRET_KEY, 'The `SECRET_KEY` must be set as environment variable');
-
-  return jwt.sign({ email }, SECRET_KEY, {
-    expiresIn: AUTH_TOKEN_EXPIRATION,
-  });
-};
-
-type CreateSignUpConfirmationTokenOptions = {
-  lastName: string;
-  firstName: string;
-  email: string;
-};
-
-export const createSignUpConfirmationToken = ({
-  firstName,
-  lastName,
-  email,
-}: CreateSignUpConfirmationTokenOptions) => {
-  assert(SECRET_KEY, 'The `SECRET_KEY` must be set as environment variable');
-
-  return jwt.sign({ firstName, lastName, email }, SECRET_KEY, {
-    expiresIn: SIGN_UP_CONFIRMATION_TOKEN_EXPIRATION,
-  });
-};
-
-export const verifyToken = <Payload>(token: string) => {
-  assert(SECRET_KEY, 'The `SECRET_KEY` must be set as environment variable');
-
-  return jwt.verify(token, SECRET_KEY) as JwtPayload & Payload;
+      return await fn({ ...options, tokenPayload });
+    } catch (e) {
+      return {
+        status: 'error',
+        statusCode: 401,
+        data: {
+          error: 'Token expired',
+        },
+      };
+    }
+  };
 };

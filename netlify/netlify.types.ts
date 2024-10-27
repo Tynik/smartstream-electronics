@@ -38,6 +38,17 @@ export type UserStatus = 'active' | 'inactive';
 
 export type OrderStatus = 'pending' | 'processed' | 'canceled' | 'archived';
 
+export type AuthTokenPayload = {
+  email: string;
+};
+
+export type ConfirmEmailTokenPayload = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: Nullable<string>;
+};
+
 export type UserRecord = {
   id: UserId;
   stripeCustomerId: Nullable<StripeCustomerId>;

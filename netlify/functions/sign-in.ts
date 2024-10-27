@@ -1,8 +1,8 @@
 import type { Nullable, UserRecord } from '../netlify.types';
 import { createHandler, hashPassword } from '../netlify.helpers';
-import { createAuthToken } from '../netlify-auth.helpers';
+import { createToken } from '../netlify-crypto.helpers';
 import { getNetlifyStore } from '../netlify-store.helpers';
-import { IS_LOCAL_ENV } from '../netlify.constants';
+import { AUTH_TOKEN_EXPIRATION, IS_LOCAL_ENV } from '../netlify.constants';
 
 type LoginPayload = {
   email: string;
@@ -52,7 +52,12 @@ export const handler = createHandler<LoginPayload>(
       };
     }
 
-    const authToken = createAuthToken({ email: payload.email });
+    const authToken = createToken<{ email: string }>(
+      { email: payload.email },
+      {
+        expiresIn: AUTH_TOKEN_EXPIRATION,
+      },
+    );
 
     return {
       status: 'ok',

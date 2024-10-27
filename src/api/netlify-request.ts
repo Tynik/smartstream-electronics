@@ -7,7 +7,7 @@ export type NetlifyFunction =
   | 'sign-up'
   | 'verify-auth-token'
   | 'get-account-profile'
-  | 'confirm-account';
+  | 'confirm-email';
 
 export type NetlifyRequestResponse<Response = unknown> = {
   status: number;

@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Nullable, UserRecord } from '../netlify.types';
-import { URL } from '../netlify.constants';
+import type { ConfirmEmailTokenPayload, Nullable, UserRecord } from '../netlify.types';
+import { EMAIL_CONFIRMATION_TOKEN_EXPIRATION, URL } from '../netlify.constants';
 import { createHandler, hashPassword, sendEmail } from '../netlify.helpers';
 import { getNetlifyStore } from '../netlify-store.helpers';
-import { createSignUpConfirmationToken } from '../netlify-auth.helpers';
+import { createToken } from '../netlify-crypto.helpers';
 
 type SignupPayload = {
   firstName: string;
@@ -44,20 +44,29 @@ export const handler = createHandler<SignupPayload>(
       type: 'json',
     })) as Nullable<UserRecord>;
 
-    const sendSignUpConfirmationEmail = () =>
-      sendEmail('sign-up-confirmation', {
+    const sendSignUpConfirmationEmail = () => {
+      const token = createToken<ConfirmEmailTokenPayload>(
+        {
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+          email: payload.email,
+          phone: null,
+        },
+        {
+          expiresIn: EMAIL_CONFIRMATION_TOKEN_EXPIRATION,
+        },
+      );
+
+      return sendEmail('email-confirmation', {
         to: payload.email,
         subject: 'Confirm Your Registration with SmartStream Electronics',
         parameters: {
           name: `${payload.firstName} ${payload.lastName}`,
-          url: URL,
-          confirmationToken: createSignUpConfirmationToken({
-            firstName: payload.firstName,
-            lastName: payload.lastName,
-            email: payload.email,
-          }),
+          siteUrl: URL,
+          confirmEmailLink: `${URL}/email/confirm?token=${token}`,
         },
       });
+    };
 
     if (existedUserRecord) {
       if (existedUserRecord.status === 'inactive') {
@@ -83,7 +92,7 @@ export const handler = createHandler<SignupPayload>(
       };
     }
 
-    const userRecord: UserRecord = {
+    const newUserRecord: UserRecord = {
       id: uuidv4(),
       stripeCustomerId: null,
       role: 'buyer',
@@ -97,7 +106,7 @@ export const handler = createHandler<SignupPayload>(
       updated: null,
     };
 
-    await usersStore.setJSON(payload.email, userRecord);
+    await usersStore.setJSON(payload.email, newUserRecord);
     await sendSignUpConfirmationEmail();
 
     return {

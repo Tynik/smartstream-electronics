@@ -40,6 +40,7 @@ const MenuStyled = styled.div<MenuStyledProps>`
 
     ${bpMedia('xs').up} {
       border-right: 1px solid ${theme.colors.neutral.charcoalDark};
+      box-shadow: 2px 0 4px rgba(0, 0, 0, 0.2); /* Right-side shadow */
     }
 
     ${bpMedia('sm').down} {
@@ -65,7 +66,7 @@ const ListItem = styled.li`
 
     font-size: 18px;
     border-radius: 4px;
-    color: ${colors.neutral.lightGray};
+    color: #ffffff;
 
     overflow: hidden;
     text-overflow: ellipsis;
