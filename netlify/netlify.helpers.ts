@@ -189,10 +189,14 @@ export const createHandler = <Payload = unknown>(
 
 type SendEmailOptions = {
   to: string;
+  subject: string;
   parameters: Record<string, string>;
 };
 
-export const sendEmail = (emailTemplate: string, { to, parameters }: SendEmailOptions) => {
+export const sendEmail = (
+  emailTemplate: 'sign-up-confirmation',
+  { subject, to, parameters }: SendEmailOptions,
+) => {
   assert(NETLIFY_EMAILS_SECRET, 'The `NETLIFY_EMAILS_SECRET` must be set as environment variable');
 
   return fetch(`${process.env.URL}/.netlify/functions/emails/${emailTemplate}`, {
@@ -202,9 +206,9 @@ export const sendEmail = (emailTemplate: string, { to, parameters }: SendEmailOp
     },
     body: JSON.stringify({
       to,
+      subject,
       parameters,
       from: 'no-reply@smartstream-electronics.co.uk',
-      subject: "You've been registered",
     }),
   });
 };

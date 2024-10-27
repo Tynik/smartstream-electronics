@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Nullable, UserRecord } from '../netlify.types';
 import { createHandler, hashPassword, sendEmail } from '../netlify.helpers';
 import { getNetlifyStore } from '../netlify-store.helpers';
+import { createSignUpConfirmationToken } from '../netlify-auth.helpers';
 
 type SignupPayload = {
   firstName: string;
@@ -42,14 +43,23 @@ export const handler = createHandler<SignupPayload>(
       type: 'json',
     })) as Nullable<UserRecord>;
 
+    const sendSignUpConfirmationEmail = () =>
+      sendEmail('sign-up-confirmation', {
+        to: payload.email,
+        subject: 'Confirm Your Registration with SmartStream Electronics',
+        parameters: {
+          name: `${payload.firstName} ${payload.lastName}`,
+          confirmationToken: createSignUpConfirmationToken({
+            firstName: payload.firstName,
+            lastName: payload.lastName,
+            email: payload.email,
+          }),
+        },
+      });
+
     if (existedUserRecord) {
       if (existedUserRecord.status === 'inactive') {
-        await sendEmail('registered', {
-          to: payload.email,
-          parameters: {
-            name: `${payload.firstName} ${payload.lastName}`,
-          },
-        });
+        await sendSignUpConfirmationEmail();
 
         return {
           status: 'error',
@@ -80,19 +90,13 @@ export const handler = createHandler<SignupPayload>(
       email: payload.email,
       phone: null,
       password: hashPassword(payload.password),
-      status: 'active',
+      status: 'inactive',
       created: Date.now(),
       updated: null,
     };
 
     await usersStore.setJSON(payload.email, userRecord);
-
-    await sendEmail('registered', {
-      to: payload.email,
-      parameters: {
-        name: `${payload.firstName} ${payload.lastName}`,
-      },
-    });
+    await sendSignUpConfirmationEmail();
 
     return {
       status: 'ok',

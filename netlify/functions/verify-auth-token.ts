@@ -1,5 +1,5 @@
 import { createHandler } from '../netlify.helpers';
-import { verifyAuthToken } from '../netlify-auth.helpers';
+import { verifyToken } from '../netlify-auth.helpers';
 
 type VerifyTokenPayload = {
   token: string;
@@ -19,7 +19,7 @@ export const handler = createHandler<VerifyTokenPayload>(
     }
 
     try {
-      verifyAuthToken(cookies.authToken);
+      verifyToken(cookies.authToken);
 
       return {
         status: 'ok',
