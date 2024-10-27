@@ -1,11 +1,15 @@
 import type { GetStoreOptions, ListOptions, Store } from '@netlify/blobs';
 import { getStore } from '@netlify/blobs';
 
-import { NETLIFY_TOKEN, SITE_ID } from './netlify.constants';
+import { IS_LOCAL_ENV, NETLIFY_TOKEN, SITE_ID } from './netlify.constants';
 
-export const getNetlifyStore = (options: Omit<GetStoreOptions, 'siteID' | 'token'>): Store =>
+export const getNetlifyStore = ({
+  name,
+  ...options
+}: Omit<GetStoreOptions, 'siteID' | 'token'>): Store =>
   getStore({
     ...options,
+    name: IS_LOCAL_ENV ? `test-${name}` : name,
     siteID: SITE_ID,
     token: NETLIFY_TOKEN,
     consistency: 'eventual',

@@ -28,6 +28,10 @@ const TextInputStyled = styled.div`
       border-radius: 4px;
       color: ${colors.neutral.mediumGray};
 
+      &:-webkit-autofill {
+        -webkit-background-clip: text;
+      }
+
       &:has(~ .text-input__error) {
         border-color: ${colors.error.redLight};
       }

@@ -35,7 +35,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       } catch (e) {
         const response = e as NetlifyRequestResponse;
 
-        if (response.status !== 200) {
+        if (response.status !== 'ok') {
           navigate(SIGN_IN_ROUTE_PATH);
 
           return Promise.reject(response);

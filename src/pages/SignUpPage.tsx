@@ -1,11 +1,11 @@
 import React from 'react';
 import type { HoneyFormFieldsConfig, HoneyFormOnSubmit } from '@react-hive/honey-form';
 import { HoneyForm } from '@react-hive/honey-form';
-import { HoneyFlexBox } from '@react-hive/honey-layout';
-import { useNavigate } from 'react-router-dom';
+import { HoneyBox, HoneyFlexBox } from '@react-hive/honey-layout';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import { SIGN_IN_ROUTE_PATH } from '~/constants';
-import { Button, TextInput } from '~/components';
+import { Button, Panel, Text, TextInput } from '~/components';
 import { handlerApiError, netlifyRequest } from '~/api';
 
 type SignUpFormData = {
@@ -72,51 +72,61 @@ export const SignUpPage = () => {
 
   return (
     <HoneyFlexBox $flexGrow={1} $justifyContent="center">
-      <HoneyForm fields={SIGN_UP_FORM_FIELDS} onSubmit={handleSignUp}>
-        {({ formFields, isFormSubmitAllowed }) => (
-          <HoneyFlexBox $gap={2} $width="100%" $maxWidth="350px" $margin="0 auto">
-            <TextInput
-              label="First Name"
-              error={formFields.firstName.errors[0]?.message}
-              {...formFields.firstName.props}
-            />
+      <Panel $width="100%" $maxWidth="600px" $margin="0 auto" $padding={[5, 2]}>
+        <HoneyForm fields={SIGN_UP_FORM_FIELDS} onSubmit={handleSignUp}>
+          {({ formFields, isFormSubmitAllowed }) => (
+            <HoneyFlexBox $gap={2} $width="100%" $maxWidth="350px" $margin="0 auto">
+              <TextInput
+                label="First Name"
+                error={formFields.firstName.errors[0]?.message}
+                {...formFields.firstName.props}
+              />
 
-            <TextInput
-              label="Last Name"
-              error={formFields.lastName.errors[0]?.message}
-              {...formFields.lastName.props}
-            />
+              <TextInput
+                label="Last Name"
+                error={formFields.lastName.errors[0]?.message}
+                {...formFields.lastName.props}
+              />
 
-            <TextInput
-              label="Email"
-              error={formFields.email.errors[0]?.message}
-              {...formFields.email.props}
-            />
+              <TextInput
+                label="Email"
+                error={formFields.email.errors[0]?.message}
+                {...formFields.email.props}
+              />
 
-            <TextInput
-              label="Password"
-              inputProps={{
-                type: 'password',
-              }}
-              error={formFields.password.errors[0]?.message}
-              {...formFields.password.props}
-            />
+              <TextInput
+                label="Password"
+                inputProps={{
+                  type: 'password',
+                }}
+                error={formFields.password.errors[0]?.message}
+                {...formFields.password.props}
+              />
 
-            <TextInput
-              label="Repeat Password"
-              inputProps={{
-                type: 'password',
-              }}
-              error={formFields.repeatPassword.errors[0]?.message}
-              {...formFields.repeatPassword.props}
-            />
+              <TextInput
+                label="Repeat Password"
+                inputProps={{
+                  type: 'password',
+                }}
+                error={formFields.repeatPassword.errors[0]?.message}
+                {...formFields.repeatPassword.props}
+              />
 
-            <Button disabled={!isFormSubmitAllowed} type="submit" $marginLeft="auto">
-              Sign Up
-            </Button>
-          </HoneyFlexBox>
-        )}
-      </HoneyForm>
+              <HoneyBox $display="flex" $gap={2} $alignItems="center">
+                <NavLink to={SIGN_IN_ROUTE_PATH}>
+                  <Text variant="body2" $fontWeight="500" $color="neutral.darkBlue">
+                    Sign In
+                  </Text>
+                </NavLink>
+
+                <Button disabled={!isFormSubmitAllowed} type="submit" $marginLeft="auto">
+                  Sign Up
+                </Button>
+              </HoneyBox>
+            </HoneyFlexBox>
+          )}
+        </HoneyForm>
+      </Panel>
     </HoneyFlexBox>
   );
 };

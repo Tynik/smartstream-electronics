@@ -6,7 +6,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 import { SIGN_UP_ROUTE_PATH } from '~/constants';
 import { handlerApiError, netlifyRequest } from '~/api';
-import { Button, Text, TextInput } from '~/components';
+import { Button, Panel, Text, TextInput } from '~/components';
 
 type SignInFormData = {
   email: string;
@@ -50,38 +50,40 @@ export const SignInPage = () => {
 
   return (
     <HoneyFlexBox $flexGrow={1} $justifyContent="center">
-      <HoneyForm fields={SIGN_IN_FORM_FIELDS} onSubmit={handleSignIn}>
-        {({ formFields, isFormSubmitAllowed }) => (
-          <HoneyFlexBox $gap={2} $width="100%" $maxWidth="350px" $margin="0 auto">
-            <TextInput
-              label="Email"
-              error={formFields.email.errors[0]?.message}
-              {...formFields.email.props}
-            />
+      <Panel $width="100%" $maxWidth="600px" $margin="0 auto" $padding={[5, 2]}>
+        <HoneyForm fields={SIGN_IN_FORM_FIELDS} onSubmit={handleSignIn}>
+          {({ formFields, isFormSubmitAllowed }) => (
+            <HoneyFlexBox $gap={2} $width="100%" $maxWidth="350px" $margin="0 auto">
+              <TextInput
+                label="Email"
+                error={formFields.email.errors[0]?.message}
+                {...formFields.email.props}
+              />
 
-            <TextInput
-              label="Password"
-              inputProps={{
-                type: 'password',
-              }}
-              error={formFields.password.errors[0]?.message}
-              {...formFields.password.props}
-            />
+              <TextInput
+                label="Password"
+                inputProps={{
+                  type: 'password',
+                }}
+                error={formFields.password.errors[0]?.message}
+                {...formFields.password.props}
+              />
 
-            <HoneyBox $display="flex" $gap={2} $alignItems="center">
-              <NavLink to={SIGN_UP_ROUTE_PATH}>
-                <Text variant="body2" $fontWeight="500" $color="neutral.darkBlue">
-                  Sign Up
-                </Text>
-              </NavLink>
+              <HoneyBox $display="flex" $gap={2} $alignItems="center">
+                <NavLink to={SIGN_UP_ROUTE_PATH}>
+                  <Text variant="body2" $fontWeight="500" $color="neutral.darkBlue">
+                    Sign Up
+                  </Text>
+                </NavLink>
 
-              <Button disabled={!isFormSubmitAllowed} type="submit" $marginLeft="auto">
-                Sign In
-              </Button>
-            </HoneyBox>
-          </HoneyFlexBox>
-        )}
-      </HoneyForm>
+                <Button disabled={!isFormSubmitAllowed} type="submit" $marginLeft="auto">
+                  Sign In
+                </Button>
+              </HoneyBox>
+            </HoneyFlexBox>
+          )}
+        </HoneyForm>
+      </Panel>
     </HoneyFlexBox>
   );
 };

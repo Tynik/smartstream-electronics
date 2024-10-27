@@ -24,6 +24,8 @@ export const Button = styled(HoneyBox).attrs<ButtonProps>(({ type }) => ({
     width: ${sizeMap[size]};
     height: 34px;
 
+    flex-shrink: 0;
+
     &:not(:disabled) {
       cursor: pointer;
     }

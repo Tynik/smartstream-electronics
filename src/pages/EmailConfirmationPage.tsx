@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
-import type { NetlifyRequestErrorResponse } from '~/api';
+import type { NetlifyRequestErrorResponse, NetlifyRequestResponse } from '~/api';
 import { netlifyRequest } from '~/api';
 import { useQueryParams } from '~/hooks';
 import { Alert, Text } from '~/components';
+import { SIGN_IN_ROUTE_PATH } from '~/constants';
 
 export const EmailConfirmationPage = () => {
+  const navigate = useNavigate();
+
   const queryParams = useQueryParams();
 
   const token = queryParams.get('token');
 
-  const { error } = useQuery<unknown, NetlifyRequestErrorResponse>({
+  const { data, error } = useQuery<NetlifyRequestResponse, NetlifyRequestErrorResponse>({
     queryKey: ['confirm-account'],
     queryFn: () =>
       netlifyRequest('confirm-email', {
@@ -22,6 +26,12 @@ export const EmailConfirmationPage = () => {
       }),
     enabled: Boolean(token),
   });
+
+  useEffect(() => {
+    if (data?.status === 'ok') {
+      navigate(SIGN_IN_ROUTE_PATH);
+    }
+  }, [data]);
 
   return (
     <>

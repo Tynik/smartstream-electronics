@@ -10,12 +10,12 @@ export type NetlifyFunction =
   | 'confirm-email';
 
 export type NetlifyRequestResponse<Response = unknown> = {
-  status: number;
+  status: string;
   data: Response;
 };
 
 export type NetlifyRequestErrorResponse = {
-  status: number;
+  status: string;
   data: {
     error: string;
   };

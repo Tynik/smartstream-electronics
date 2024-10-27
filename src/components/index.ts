@@ -7,3 +7,4 @@ export * from './TextInput';
 export * from './Button';
 export * from './Text';
 export * from './Alert';
+export * from './Panel';
