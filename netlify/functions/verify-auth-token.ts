@@ -8,8 +8,6 @@ type VerifyTokenPayload = {
 export const handler = createHandler<VerifyTokenPayload>(
   { allowMethods: ['GET'] },
   async ({ cookies }) => {
-    console.log(process.env);
-
     if (!cookies.authToken) {
       return {
         status: 'error',

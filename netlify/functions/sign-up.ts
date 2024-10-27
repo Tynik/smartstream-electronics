@@ -44,10 +44,18 @@ export const handler = createHandler<SignupPayload>(
 
     if (existedUserRecord) {
       if (existedUserRecord.status === 'inactive') {
+        await sendEmail('registered', {
+          to: payload.email,
+          parameters: {
+            name: `${payload.firstName} ${payload.lastName}`,
+          },
+        });
+
         return {
           status: 'error',
           statusCode: 400,
           data: {
+            errorCode: 1001,
             error: 'The confirmation link is sent to your email address',
           },
         };
@@ -57,6 +65,7 @@ export const handler = createHandler<SignupPayload>(
         status: 'error',
         statusCode: 400,
         data: {
+          errorCode: 1000,
           error: 'User is already registered with that email address',
         },
       };
