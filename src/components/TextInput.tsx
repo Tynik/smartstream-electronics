@@ -24,7 +24,7 @@ const TextInputStyled = styled.div`
 
       padding: 8px;
 
-      border: 1px solid ${colors.neutral.gray};
+      border: 1px solid ${colors.secondary.mediumLightGray};
       border-radius: 4px;
       color: ${colors.neutral.mediumGray};
 
@@ -33,7 +33,7 @@ const TextInputStyled = styled.div`
       }
 
       &:has(~ .text-input__error) {
-        border-color: ${colors.error.redLight};
+        border-color: ${colors.error.crimsonRed};
       }
     }
 

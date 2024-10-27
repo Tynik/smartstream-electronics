@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 import { bpMedia, resolveSpacing, useHoneyLayout } from '@react-hive/honey-layout';
@@ -16,6 +16,7 @@ const MenuStyled = styled.div<MenuStyledProps>`
     position: relative;
 
     display: flex;
+    flex-direction: column;
     flex-shrink: 0;
 
     height: 100%;
@@ -89,10 +90,17 @@ const ListItem = styled.li`
   `}
 `;
 
+type MenuItem = {
+  id: string;
+  title: string;
+  to: string;
+  isVisible?: boolean;
+};
+
 export const Menu = () => {
   const { screenState } = useHoneyLayout();
 
-  const { isOpenMenu, toggleMenu } = useCurrentApp();
+  const { accountProfile, isOpenMenu, toggleMenu } = useCurrentApp();
 
   const handleOnClickMenuItem = () => {
     if (screenState.isXs || screenState.isSm) {
@@ -100,14 +108,31 @@ export const Menu = () => {
     }
   };
 
+  const menuItems = useMemo<MenuItem[]>(
+    () => [
+      {
+        id: 'products',
+        title: 'Products',
+        to: '/products',
+        isVisible: accountProfile?.role === 'admin',
+      },
+    ],
+    [accountProfile],
+  );
+
   return (
     <MenuStyled isOpenMenu={isOpenMenu}>
       <List>
-        <ListItem>
-          <NavLink onClick={handleOnClickMenuItem} to="/">
-            Test
-          </NavLink>
-        </ListItem>
+        {menuItems.map(
+          item =>
+            item.isVisible !== false && (
+              <ListItem key={item.id}>
+                <NavLink onClick={handleOnClickMenuItem} to={item.to}>
+                  {item.title}
+                </NavLink>
+              </ListItem>
+            ),
+        )}
       </List>
     </MenuStyled>
   );

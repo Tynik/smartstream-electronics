@@ -12,6 +12,7 @@ type AppContextValue = {
   isOpenMenu: boolean;
   toggleMenu: () => void;
   accountProfile: AccountProfile | undefined;
+  isAccountProfileLoading: boolean;
 };
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -60,8 +61,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       isOpenMenu,
       toggleMenu: () => setIsOpenMenu(!isOpenMenu),
       accountProfile,
+      isAccountProfileLoading,
     }),
-    [isOpenMenu, accountProfile],
+    [isOpenMenu, accountProfile, isAccountProfileLoading],
   );
 
   return <AppContext.Provider value={contextValue}>{children(contextValue)}</AppContext.Provider>;

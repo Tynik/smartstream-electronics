@@ -15,3 +15,7 @@ export const Text = styled(HoneyBox).attrs<ButtonProps>(({ as }) => ({
     ${resolveFont(variant)}
   `}
 `;
+
+Text.defaultProps = {
+  $color: 'neutral.darkGray',
+};

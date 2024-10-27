@@ -2,6 +2,15 @@ import type { HoneyCSSColor, HoneyFont, HoneyTheme } from '@react-hive/honey-lay
 
 type PrimaryColors = 'skyBlue' | 'aliceBlue' | 'dodgerBlue' | 'deepSkyBlue';
 
+type SecondaryColors =
+  | 'lightestGray'
+  | 'extraLightGray'
+  | 'lightGray'
+  | 'softGray'
+  | 'mediumLightGray';
+
+type AccentColors = string;
+
 type NeutralColors =
   | 'charcoalDark'
   | 'charcoalGray'
@@ -9,12 +18,7 @@ type NeutralColors =
   | 'slateBlue'
   | 'darkGray'
   | 'mediumGray'
-  | 'lightGray'
-  | 'darkBlue'
-  | 'grayLight'
-  | 'gray'
-  | 'grayDark'
-  | 'grayDarker';
+  | 'lightGray';
 
 type SuccessColors = 'greenLight' | 'mintGreen' | 'green' | 'emeraldGreen' | 'greenDark';
 
@@ -45,6 +49,8 @@ declare module '@react-hive/honey-layout' {
 
   export interface HoneyColors {
     primary: Record<PrimaryColors, HoneyCSSColor>;
+    secondary: Record<SecondaryColors, HoneyCSSColor>;
+    accent: Record<AccentColors, HoneyCSSColor>;
     neutral: Record<NeutralColors, HoneyCSSColor>;
     success: Record<SuccessColors, HoneyCSSColor>;
     warning: Record<WarningColors, HoneyCSSColor>;
@@ -105,7 +111,13 @@ export const theme: HoneyTheme = {
       dodgerBlue: '#1E90FF', // Brighter blue for buttons or active states
       deepSkyBlue: '#00BFFF', // Vibrant blue, ideal for interactive elements
     },
-    secondary: {},
+    secondary: {
+      lightestGray: '#F9F9F9', // Very light gray, nearly white, good for background
+      extraLightGray: '#F2F2F2', // Extra light gray for background or hover states
+      lightGray: '#EAEAEA', // Light gray, a subtle contrast for card backgrounds
+      softGray: '#DADADA', // Soft gray for neutral components like dividers
+      mediumLightGray: '#C8C8C8', // Slightly darker, for borders and outlines
+    },
     accent: {},
     neutral: {
       charcoalDark: '#222222',
@@ -116,12 +128,6 @@ export const theme: HoneyTheme = {
       darkGray: '#333333', // Dark gray, ideal for primary text
       mediumGray: '#4F4F4F', // Medium gray for secondary text
       lightGray: '#7A7A7A', // Lighter gray for muted or placeholder text
-      darkBlue: '#1E90FF', // Dodger blue for strong emphasis
-      // Borders
-      grayLight: '#E0E0E0',
-      gray: '#B0B0B0',
-      grayDark: '#808080',
-      grayDarker: '#4F4F4F',
     },
     success: {
       greenLight: '#E6FFE6', // Very light green, subtle success background

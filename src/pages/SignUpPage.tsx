@@ -72,30 +72,30 @@ export const SignUpPage = () => {
 
   return (
     <HoneyFlexBox $flexGrow={1} $justifyContent="center">
-      <Panel $width="100%" $maxWidth="600px" $margin="0 auto" $padding={[5, 2]}>
+      <Panel title="Sign Up" $width="100%" $maxWidth="600px" $margin="0 auto" $padding={[5, 2]}>
         <HoneyForm fields={SIGN_UP_FORM_FIELDS} onSubmit={handleSignUp}>
           {({ formFields, isFormSubmitAllowed }) => (
             <HoneyFlexBox $gap={2} $width="100%" $maxWidth="350px" $margin="0 auto">
               <TextInput
-                label="First Name"
+                label="* First Name"
                 error={formFields.firstName.errors[0]?.message}
                 {...formFields.firstName.props}
               />
 
               <TextInput
-                label="Last Name"
+                label="* Last Name"
                 error={formFields.lastName.errors[0]?.message}
                 {...formFields.lastName.props}
               />
 
               <TextInput
-                label="Email"
+                label="* Email"
                 error={formFields.email.errors[0]?.message}
                 {...formFields.email.props}
               />
 
               <TextInput
-                label="Password"
+                label="* Password"
                 inputProps={{
                   type: 'password',
                 }}
@@ -104,7 +104,7 @@ export const SignUpPage = () => {
               />
 
               <TextInput
-                label="Repeat Password"
+                label="* Repeat Password"
                 inputProps={{
                   type: 'password',
                 }}
@@ -114,7 +114,7 @@ export const SignUpPage = () => {
 
               <HoneyBox $display="flex" $gap={2} $alignItems="center">
                 <NavLink to={SIGN_IN_ROUTE_PATH}>
-                  <Text variant="body2" $fontWeight="500" $color="neutral.darkBlue">
+                  <Text variant="body2" $fontWeight="500" $color="primary.dodgerBlue">
                     Sign In
                   </Text>
                 </NavLink>

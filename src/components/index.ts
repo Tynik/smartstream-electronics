@@ -8,3 +8,4 @@ export * from './Button';
 export * from './Text';
 export * from './Alert';
 export * from './Panel';
+export * from './Loading';
