@@ -45,6 +45,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       return Promise.reject(null);
     },
     refetchInterval: 900000, // 15 minutes
+    refetchIntervalInBackground: true,
     enabled: Boolean(authToken),
   });
 

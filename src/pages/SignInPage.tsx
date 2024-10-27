@@ -6,7 +6,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 import { SIGN_UP_ROUTE_PATH } from '~/constants';
 import { handlerApiError, netlifyRequest } from '~/api';
-import { Button, Panel, Text, TextInput } from '~/components';
+import { Alert, Button, Panel, Text, TextInput } from '~/components';
+import { useQueryParams } from '~/hooks';
 
 type SignInFormData = {
   email: string;
@@ -31,6 +32,7 @@ const SIGN_IN_FORM_FIELDS: HoneyFormFieldsConfig<SignInFormData> = {
 
 export const SignInPage = () => {
   const navigate = useNavigate();
+  const queryParams = useQueryParams();
 
   const handleSignIn: HoneyFormOnSubmit<SignInFormData> = async data => {
     try {
@@ -48,9 +50,17 @@ export const SignInPage = () => {
     }
   };
 
+  const isEmailConfirmed = queryParams.get('emailConfirmed') === 'true';
+
   return (
     <HoneyFlexBox $flexGrow={1} $justifyContent="center">
       <Panel $width="100%" $maxWidth="600px" $margin="0 auto" $padding={[5, 2]}>
+        {isEmailConfirmed && (
+          <Alert>
+            Your email has been successfully confirmed! You can now proceed to sign in below.
+          </Alert>
+        )}
+
         <HoneyForm fields={SIGN_IN_FORM_FIELDS} onSubmit={handleSignIn}>
           {({ formFields, isFormSubmitAllowed }) => (
             <HoneyFlexBox $gap={2} $width="100%" $maxWidth="350px" $margin="0 auto">

@@ -29,14 +29,14 @@ export const EmailConfirmationPage = () => {
 
   useEffect(() => {
     if (data?.status === 'ok') {
-      navigate(SIGN_IN_ROUTE_PATH);
+      navigate(`${SIGN_IN_ROUTE_PATH}?emailConfirmed=true`);
     }
   }, [data]);
 
   return (
     <>
       {error && (
-        <Alert>
+        <Alert variant="error">
           <Text variant="body2">{error.data.error}</Text>
         </Alert>
       )}

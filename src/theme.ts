@@ -1,5 +1,7 @@
 import type { HoneyCSSColor, HoneyFont, HoneyTheme } from '@react-hive/honey-layout';
 
+type PrimaryColors = 'skyBlue' | 'aliceBlue' | 'dodgerBlue' | 'deepSkyBlue';
+
 type NeutralColors =
   | 'charcoalDark'
   | 'charcoalGray'
@@ -42,6 +44,7 @@ declare module '@react-hive/honey-layout' {
   }
 
   export interface HoneyColors {
+    primary: Record<PrimaryColors, HoneyCSSColor>;
     neutral: Record<NeutralColors, HoneyCSSColor>;
     success: Record<SuccessColors, HoneyCSSColor>;
     warning: Record<WarningColors, HoneyCSSColor>;
@@ -96,7 +99,12 @@ export const theme: HoneyTheme = {
   },
   dimensions: {},
   colors: {
-    primary: {},
+    primary: {
+      skyBlue: '#87CEEB', // Sky blue, gentle primary color option
+      aliceBlue: '#F0F8FF', // Very light blue, suitable for subtle backgrounds
+      dodgerBlue: '#1E90FF', // Brighter blue for buttons or active states
+      deepSkyBlue: '#00BFFF', // Vibrant blue, ideal for interactive elements
+    },
     secondary: {},
     accent: {},
     neutral: {

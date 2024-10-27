@@ -4,6 +4,7 @@ import { HoneyFlexBox } from '@react-hive/honey-layout';
 export const Panel = styled(HoneyFlexBox)``;
 
 Panel.defaultProps = {
+  $gap: 2,
   $borderRadius: '4px',
   $border: '1px solid',
   $borderColor: 'neutral.grayLight',
