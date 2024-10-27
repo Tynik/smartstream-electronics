@@ -5,11 +5,20 @@ export type NetlifyFunction =
   | 'get-products'
   | 'sign-in'
   | 'sign-up'
-  | 'verify-auth-token';
+  | 'verify-auth-token'
+  | 'get-account-profile'
+  | 'confirm-account';
 
-export type NetlifyRequestResponse<Response> = {
-  status: string;
+export type NetlifyRequestResponse<Response = unknown> = {
+  status: number;
   data: Response;
+};
+
+export type NetlifyRequestErrorResponse = {
+  status: number;
+  data: {
+    error: string;
+  };
 };
 
 type NetlifyRequestOptions<Payload> = {
@@ -54,7 +63,7 @@ export const netlifyRequest = async <Response, Payload = unknown>(
   );
 
   if (!response.ok) {
-    return Promise.reject(await response.json());
+    return Promise.reject((await response.json()) as NetlifyRequestErrorResponse);
   }
 
   return (await response.json()) as NetlifyRequestResponse<Response>;

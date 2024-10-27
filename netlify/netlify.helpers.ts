@@ -40,7 +40,7 @@ const formatCookie = ({
   maxAge,
   secure,
   partitioned,
-  httpOnly = true,
+  httpOnly = false,
   sameSite,
 }: CookieOptions) => {
   let cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;

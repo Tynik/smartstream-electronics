@@ -30,12 +30,12 @@ export const handler = createHandler<LoginPayload>(
       type: 'json',
     })) as Nullable<UserRecord>;
 
-    if (!userRecord) {
+    if (!userRecord || userRecord.status === 'inactive') {
       return {
         status: 'error',
         statusCode: 400,
         data: {
-          error: 'User not found',
+          error: 'User not found or inactive',
         },
       };
     }

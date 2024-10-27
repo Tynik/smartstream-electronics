@@ -2,10 +2,11 @@ import React from 'react';
 import type { HoneyFormFieldsConfig, HoneyFormOnSubmit } from '@react-hive/honey-form';
 import { HoneyForm } from '@react-hive/honey-form';
 import { HoneyFlexBox } from '@react-hive/honey-layout';
-
 import { useNavigate } from 'react-router-dom';
+
+import { SIGN_IN_ROUTE_PATH } from '~/constants';
 import { Button, TextInput } from '~/components';
-import { netlifyRequest } from '~/api';
+import { handlerApiError, netlifyRequest } from '~/api';
 
 type SignUpFormData = {
   firstName: string;
@@ -63,9 +64,9 @@ export const SignUpPage = () => {
         },
       });
 
-      navigate('/sign-in');
+      navigate(SIGN_IN_ROUTE_PATH);
     } catch (e) {
-      //
+      handlerApiError(e);
     }
   };
 

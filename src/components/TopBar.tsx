@@ -2,7 +2,8 @@ import React from 'react';
 import { HoneyBox } from '@react-hive/honey-layout';
 import { useNavigate } from 'react-router-dom';
 
-import { MenuIcon, PersonIcon } from '~/icons';
+import { SIGN_IN_ROUTE_PATH } from '~/constants';
+import { LogoutIcon, MenuIcon, PersonIcon } from '~/icons';
 import { useCurrentApp } from '~/providers';
 
 import { IconButton } from './IconButton';
@@ -10,7 +11,13 @@ import { IconButton } from './IconButton';
 export const TopBar = () => {
   const navigate = useNavigate();
 
-  const { toggleMenu } = useCurrentApp();
+  const { accountProfile, toggleMenu } = useCurrentApp();
+
+  const handleLogout = () => {
+    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+
+    navigate(SIGN_IN_ROUTE_PATH);
+  };
 
   return (
     <HoneyBox
@@ -26,9 +33,17 @@ export const TopBar = () => {
         <MenuIcon $color="white" />
       </IconButton>
 
-      <IconButton onClick={() => navigate('sign-in')} $marginLeft="auto">
-        <PersonIcon $color="white" />
-      </IconButton>
+      <HoneyBox $marginLeft="auto">
+        {accountProfile ? (
+          <IconButton onClick={handleLogout}>
+            <LogoutIcon $color="white" />
+          </IconButton>
+        ) : (
+          <IconButton onClick={() => navigate(SIGN_IN_ROUTE_PATH)}>
+            <PersonIcon $color="white" />
+          </IconButton>
+        )}
+      </HoneyBox>
     </HoneyBox>
   );
 };

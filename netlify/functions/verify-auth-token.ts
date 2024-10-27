@@ -30,7 +30,7 @@ export const handler = createHandler<VerifyTokenPayload>(
         status: 'error',
         statusCode: 401,
         data: {
-          error: 'Token is invalid',
+          error: 'Token expired',
         },
       };
     }

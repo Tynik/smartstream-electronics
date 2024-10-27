@@ -4,7 +4,8 @@ import { HoneyForm } from '@react-hive/honey-form';
 import { HoneyBox, HoneyFlexBox } from '@react-hive/honey-layout';
 import { NavLink } from 'react-router-dom';
 
-import { netlifyRequest } from '~/api';
+import { SIGN_UP_ROUTE_PATH } from '~/constants';
+import { handlerApiError, netlifyRequest } from '~/api';
 import { Button, Text, TextInput } from '~/components';
 
 type SignInFormData = {
@@ -39,7 +40,7 @@ export const SignInPage = () => {
         },
       });
     } catch (e) {
-      //
+      handlerApiError(e);
     }
   };
 
@@ -64,7 +65,7 @@ export const SignInPage = () => {
             />
 
             <HoneyBox $display="flex" $gap={2} $alignItems="center">
-              <NavLink to="/sign-up">
+              <NavLink to={SIGN_UP_ROUTE_PATH}>
                 <Text variant="body2" $fontWeight="500" $color="neutral.darkBlue">
                   Sign Up
                 </Text>

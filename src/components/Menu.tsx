@@ -5,6 +5,8 @@ import { bpMedia, resolveSpacing, useHoneyLayout } from '@react-hive/honey-layou
 
 import { useCurrentApp } from '~/providers';
 
+export const MENU_WIDTH = '300px';
+
 type MenuStyledProps = {
   isOpenMenu: boolean;
 };
@@ -24,7 +26,7 @@ const MenuStyled = styled.div<MenuStyledProps>`
 
     ${isOpenMenu
       ? css`
-          width: 300px;
+          width: ${MENU_WIDTH};
           padding: 16px;
         `
       : css`

@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 import { SECRET_KEY } from './netlify.constants';
 import { assert } from './netlify.helpers';
@@ -36,8 +36,8 @@ export const createSignUpConfirmationToken = ({
   });
 };
 
-export const verifyToken = (token: string) => {
+export const verifyToken = <Payload>(token: string) => {
   assert(SECRET_KEY, 'The `SECRET_KEY` must be set as environment variable');
 
-  return jwt.verify(token, SECRET_KEY);
+  return jwt.verify(token, SECRET_KEY) as JwtPayload & Payload;
 };
