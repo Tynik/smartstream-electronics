@@ -1,16 +1,11 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import React from 'react';
 
-import {
-  ADD_PRODUCT_ROUTE_PATH,
-  PRODUCTS_ROUTE_PATH,
-  PROFILE_ROUTE_PATH,
-  SIGN_IN_ROUTE_PATH,
-  SIGN_UP_ROUTE_PATH,
-} from '~/constants';
+import { PROFILE_ROUTE_PATH, SIGN_IN_ROUTE_PATH, SIGN_UP_ROUTE_PATH } from '~/constants';
 import {
   AddProductPage,
   EmailConfirmationPage,
+  FeaturesPage,
   ProductsPage,
   ProfilePage,
   SignInPage,
@@ -33,10 +28,11 @@ export const AppRoutes = () => {
           <Route path={PROFILE_ROUTE_PATH} element={<ProfilePage />} />
 
           {accountProfile.role === 'admin' && (
-            <>
-              <Route path={PRODUCTS_ROUTE_PATH} element={<ProductsPage />} />
-              <Route path={ADD_PRODUCT_ROUTE_PATH} element={<AddProductPage />} />
-            </>
+            <Route path="/manage/*">
+              <Route path="products" element={<ProductsPage />} />
+              <Route path="features" element={<FeaturesPage />} />
+              <Route path="products/add" element={<AddProductPage />} />
+            </Route>
           )}
         </>
       ) : (

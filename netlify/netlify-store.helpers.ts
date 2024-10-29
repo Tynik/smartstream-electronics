@@ -27,11 +27,18 @@ export const getNetlifyStoreRecordsByKeys = async <T>(store: Store, keys: string
 
 export const getNetlifyStoreRecords = async <T>(
   store: Store,
-  listOptions: Omit<ListOptions, 'paginate'>,
+  listOptions: Omit<ListOptions, 'paginate'> = {},
   { offset = 0, limit = 1000 }: GetNetlifyStoreRecordsOptions = {},
 ) => {
   const listResult = await store.list(listOptions);
   const keys = listResult.blobs.slice(offset, offset + limit).map(blob => blob.key);
 
   return getNetlifyStoreRecordsByKeys<T>(store, keys);
+};
+
+export const clearNetlifyStore = async (store: Store) => {
+  const listResult = await store.list();
+  const keys = listResult.blobs.map(blob => blob.key);
+
+  await Promise.all(keys.map(key => store.delete(key)));
 };

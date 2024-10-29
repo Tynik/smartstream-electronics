@@ -1,6 +1,7 @@
 import type { Nullable } from '~/types';
 
 export type ProductId = string;
+export type FeatureCategoryId = string;
 
 type UserRole = 'admin' | 'buyer';
 
@@ -15,6 +16,11 @@ export type AccountProfile = {
   email: string;
   phone: Nullable<string>;
   role: UserRole;
+};
+
+export type FeatureCategory = {
+  id: FeatureCategoryId;
+  name: string;
 };
 
 export type Product = {

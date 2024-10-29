@@ -1,8 +1,7 @@
 import type { Handler, HandlerResponse, HandlerEvent, HandlerContext } from '@netlify/functions';
-import crypto from 'crypto';
 
 import type { Nullable } from './netlify.types';
-import { URL, NETLIFY_EMAILS_SECRET, SECRET_KEY, SITE_DOMAIN } from './netlify.constants';
+import { URL, NETLIFY_EMAILS_SECRET, SITE_DOMAIN } from './netlify.constants';
 
 type HTTPMethod = 'POST' | 'GET' | 'OPTIONS' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -11,12 +10,6 @@ export function assert(condition: any, message: string): asserts condition {
     throw new Error(message);
   }
 }
-
-export const hashPassword = (password: string): string => {
-  assert(SECRET_KEY, 'The `SECRET_KEY` must be set as environment variable');
-
-  return crypto.createHmac('sha256', SECRET_KEY).update(password).digest('hex');
-};
 
 type CookieOptions = {
   name: string;

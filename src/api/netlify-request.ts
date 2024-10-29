@@ -3,6 +3,8 @@ import type { HTTPRequestMethod } from '~/types';
 export type NetlifyFunction =
   | 'get-product'
   | 'get-products'
+  | 'add-feature-category'
+  | 'get-feature-categories'
   | 'sign-in'
   | 'sign-up'
   | 'verify-auth-token'

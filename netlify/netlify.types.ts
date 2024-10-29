@@ -18,7 +18,7 @@ export type DatasheetId = string;
 
 export type CategoryId = string;
 
-export type FeatureSectionId = string;
+export type FeatureCategoryId = string;
 
 export type FeatureId = string;
 
@@ -113,14 +113,14 @@ export type CategoryRecord = {
   isVisible: boolean;
 };
 
-export type FeatureSectionRecord = {
-  id: FeatureSectionId;
+export type FeatureCategoryRecord = {
+  id: FeatureCategoryId;
   name: string;
 };
 
 export type FeatureRecord = {
   id: FeatureId;
-  featureSectionId: FeatureSectionId;
+  categoryId: FeatureCategoryId;
   name: string;
 };
 

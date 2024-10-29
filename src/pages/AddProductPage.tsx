@@ -4,7 +4,7 @@ import { HoneyFlexBox } from '@react-hive/honey-layout';
 import { useNavigate } from 'react-router-dom';
 
 import { Button, Panel } from '~/components';
-import { PRODUCTS_ROUTE_PATH } from '~/constants';
+import { MANAGE_PRODUCTS_ROUTE_PATH } from '~/constants';
 import { handlerApiError } from '~/api';
 
 type AddProductFormData = {
@@ -22,7 +22,7 @@ export const AddProductPage = () => {
     try {
       //
 
-      navigate(PRODUCTS_ROUTE_PATH);
+      navigate(MANAGE_PRODUCTS_ROUTE_PATH);
     } catch (e) {
       handlerApiError(e);
     }
@@ -31,7 +31,7 @@ export const AddProductPage = () => {
   return (
     <Panel title="Add Product">
       <HoneyForm fields={ADD_PRODUCT_FORM_FIELDS} onSubmit={handleAddProduct}>
-        {({ formFields, isFormSubmitAllowed }) => (
+        {({ isFormSubmitAllowed }) => (
           <HoneyFlexBox $gap={2} $width="100%" $maxWidth="350px" $margin="0 auto">
             <Button disabled={!isFormSubmitAllowed} type="submit" $marginLeft="auto">
               Add

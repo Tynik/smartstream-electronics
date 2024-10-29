@@ -2,9 +2,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type { ConfirmEmailTokenPayload, Nullable, UserRecord } from '../netlify.types';
 import { EMAIL_CONFIRMATION_TOKEN_EXPIRATION, URL } from '../netlify.constants';
-import { createHandler, hashPassword, sendEmail } from '../netlify.helpers';
+import { createHandler, sendEmail } from '../netlify.helpers';
 import { getNetlifyStore } from '../netlify-store.helpers';
-import { createToken } from '../netlify-crypto.helpers';
+import { createToken, hashPassword } from '../netlify-crypto.helpers';
 
 type SignupPayload = {
   firstName: string;

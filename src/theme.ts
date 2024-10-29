@@ -73,19 +73,20 @@ export const theme: HoneyTheme = {
   },
   fonts: {
     h4: {
-      size: 22,
+      size: 24,
     },
     h5: {
-      size: 20,
+      size: 22,
     },
     h6: {
-      size: 18,
+      size: 20,
     },
     subtitle1: {
-      size: 16,
+      size: 18,
+      weight: 600,
     },
     subtitle2: {
-      size: 14,
+      size: 16,
     },
     body1: {
       size: 16,

@@ -1,4 +1,4 @@
-import type { AccountProfile, PaginationPayload, Product } from './api.types';
+import type { AccountProfile, FeatureCategory, PaginationPayload, Product } from './api.types';
 import { netlifyRequest } from './netlify-request';
 
 export const getAccountProfile = async () =>
@@ -10,3 +10,18 @@ export const getProducts = async (payload: PaginationPayload) =>
       params: payload,
     })
   ).data;
+
+type AddFeatureCategoryPayload = {
+  name: string;
+};
+
+export const addFeatureCategory = async (payload: AddFeatureCategoryPayload) =>
+  (
+    await netlifyRequest('add-feature-category', {
+      payload,
+      method: 'POST',
+    })
+  ).data;
+
+export const getFeatureCategories = async () =>
+  (await netlifyRequest<FeatureCategory[]>('get-feature-categories')).data;
