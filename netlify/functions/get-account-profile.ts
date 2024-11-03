@@ -1,7 +1,6 @@
-import type { Nullable, UserRecord } from '../netlify.types';
 import { createHandler } from '../netlify.helpers';
-import { getNetlifyStore } from '../netlify-store.helpers';
 import { withCredentials } from '../netlify-auth.helpers';
+import { netlifyStores } from '../netlify-store';
 
 type SignupPayload = {
   firstName: string;
@@ -13,14 +12,7 @@ type SignupPayload = {
 export const handler = createHandler<SignupPayload>(
   { allowMethods: ['GET'] },
   withCredentials(async ({ tokenPayload }) => {
-    const usersStore = getNetlifyStore({
-      name: 'users',
-    });
-
-    const userRecord = (await usersStore.get(tokenPayload.email, {
-      type: 'json',
-    })) as Nullable<UserRecord>;
-
+    const userRecord = await netlifyStores.users.get(tokenPayload.email);
     if (!userRecord || userRecord.status === 'inactive') {
       return {
         status: 'error',

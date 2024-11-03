@@ -20,6 +20,8 @@ export type CategoryId = string;
 
 export type FeatureCategoryId = string;
 
+export type MeasurementId = string;
+
 export type FeatureId = string;
 
 export type ProductId = string;
@@ -86,6 +88,11 @@ export type FileRecord = {
   id: FileId;
 };
 
+export type MeasurementRecord = {
+  id: MeasurementId;
+  name: string;
+};
+
 export type ManufacturerRecord = {
   id: ManufacturerId;
   logoFileId: Nullable<FileId>;
@@ -121,6 +128,7 @@ export type FeatureCategoryRecord = {
 export type FeatureRecord = {
   id: FeatureId;
   categoryId: FeatureCategoryId;
+  measurementId: MeasurementId;
   name: string;
 };
 

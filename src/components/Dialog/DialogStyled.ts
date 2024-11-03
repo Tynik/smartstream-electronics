@@ -1,12 +1,15 @@
-import type { PropsWithChildren } from 'react';
-import React from 'react';
 import styled, { css } from 'styled-components';
-import { createPortal } from 'react-dom';
 import { resolveColor, resolveFont, resolveSpacing } from '@react-hive/honey-layout';
+
+export const DIALOG_TRANSITION_DURATION_MS = 250;
 
 const TOP_PERCENTAGE = '25%';
 
-const DialogStyled = styled.div<DialogStyledProps>`
+export type DialogStyledProps = {
+  isOpen: boolean;
+};
+
+export const DialogStyled = styled.div<DialogStyledProps>`
   ${({ isOpen, theme: { colors } }) => css`
     position: absolute;
 
@@ -14,7 +17,7 @@ const DialogStyled = styled.div<DialogStyledProps>`
     visibility: ${isOpen ? 'visible' : 'hidden'};
 
     transition-property: opacity, visibility;
-    transition-duration: 250ms;
+    transition-duration: ${DIALOG_TRANSITION_DURATION_MS}ms;
     transition-timing-function: ease-in-out;
 
     left: 0;
@@ -80,27 +83,3 @@ const DialogStyled = styled.div<DialogStyledProps>`
     }
   `}
 `;
-
-type DialogStyledProps = {
-  isOpen: boolean;
-};
-
-type DialogProps = DialogStyledProps & {
-  title: string;
-  onClose: () => void;
-};
-
-export const Dialog = ({ children, title, onClose, ...props }: PropsWithChildren<DialogProps>) => {
-  return createPortal(
-    <DialogStyled {...props}>
-      <div onClick={onClose} className="dialog__backdrop" />
-
-      <div className="dialog__body">
-        <div className="dialog__title">{title}</div>
-
-        <div className="dialog__content">{children}</div>
-      </div>
-    </DialogStyled>,
-    document.body,
-  );
-};

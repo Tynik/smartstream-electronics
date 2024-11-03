@@ -15,21 +15,21 @@ export const getNetlifyStore = ({
     consistency: 'eventual',
   });
 
-type GetNetlifyStoreRecordsOptions = {
-  offset?: number;
-  limit?: number;
-};
-
 export const getNetlifyStoreRecordsByKeys = async <T>(store: Store, keys: string[]) =>
   (await Promise.all(
     keys.map(key => store.get(key, { type: 'json', consistency: 'eventual' })),
   )) as T[];
 
+export type GetNetlifyStoreRecordsOptions = {
+  offset?: number;
+  limit?: number;
+};
+
 export const getNetlifyStoreRecords = async <T>(
   store: Store,
   listOptions: Omit<ListOptions, 'paginate'> = {},
   { offset = 0, limit = 1000 }: GetNetlifyStoreRecordsOptions = {},
-) => {
+): Promise<T[]> => {
   const listResult = await store.list(listOptions);
   const keys = listResult.blobs.slice(offset, offset + limit).map(blob => blob.key);
 

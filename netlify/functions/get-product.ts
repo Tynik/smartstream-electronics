@@ -1,6 +1,5 @@
-import type { Nullable, ProductRecord } from '../netlify.types';
 import { createHandler } from '../netlify.helpers';
-import { getNetlifyStore } from '../netlify-store.helpers';
+import { netlifyStores } from '../netlify-store';
 
 export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }) => {
   const productId = event.queryStringParameters?.productId;
@@ -14,14 +13,7 @@ export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }
     };
   }
 
-  const productsStore = getNetlifyStore({
-    name: 'products',
-  });
-
-  const productRecord = (await productsStore.get(productId, {
-    type: 'json',
-  })) as Nullable<ProductRecord>;
-
+  const productRecord = await netlifyStores.products.get(productId);
   if (!productRecord) {
     return {
       status: 'error',

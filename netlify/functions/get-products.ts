@@ -1,6 +1,5 @@
-import type { ProductRecord } from '../netlify.types';
 import { createHandler } from '../netlify.helpers';
-import { getNetlifyStore, getNetlifyStoreRecords } from '../netlify-store.helpers';
+import { netlifyStores } from '../netlify-store';
 
 export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }) => {
   const categoryId = event.queryStringParameters?.categoryId;
@@ -27,12 +26,7 @@ export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }
     };
   }
 
-  const productsStore = getNetlifyStore({
-    name: 'products',
-  });
-
-  const productRecords = await getNetlifyStoreRecords<ProductRecord>(
-    productsStore,
+  const productRecords = await netlifyStores.products.getRecords(
     {
       prefix: categoryId,
     },

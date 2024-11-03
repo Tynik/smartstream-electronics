@@ -1,9 +1,7 @@
-import React, { forwardRef, useId } from 'react';
-import type { InputHTMLAttributes, ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 import { resolveFont } from '@react-hive/honey-layout';
 
-const TextInputStyled = styled.div`
+export const TextInputStyled = styled.div`
   ${({ theme: { colors } }) => css`
     display: flex;
     flex-direction: column;
@@ -44,25 +42,3 @@ const TextInputStyled = styled.div`
     }
   `}
 `;
-
-type TextInputProps = {
-  label: string;
-  error?: ReactNode;
-  inputProps?: InputHTMLAttributes<HTMLInputElement>;
-};
-
-export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
-  ({ label, error, inputProps, ...props }, ref) => {
-    const id = useId();
-
-    return (
-      <TextInputStyled {...props}>
-        <label htmlFor={id}>{label}</label>
-
-        <input ref={ref} id={id} {...inputProps} />
-
-        {error && <p className="text-input__error">{error}</p>}
-      </TextInputStyled>
-    );
-  },
-);

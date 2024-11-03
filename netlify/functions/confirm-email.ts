@@ -1,7 +1,7 @@
-import type { ConfirmEmailTokenPayload, Nullable, UserRecord } from '../netlify.types';
+import type { ConfirmEmailTokenPayload } from '../netlify.types';
 import { createHandler } from '../netlify.helpers';
-import { getNetlifyStore } from '../netlify-store.helpers';
 import { verifyToken } from '../netlify-crypto.helpers';
+import { netlifyStores } from '../netlify-store';
 
 export const handler = createHandler({ allowMethods: ['POST'] }, async ({ event }) => {
   const token = event.queryStringParameters?.token;
@@ -18,14 +18,7 @@ export const handler = createHandler({ allowMethods: ['POST'] }, async ({ event 
   try {
     const tokenPayload = verifyToken<ConfirmEmailTokenPayload>(token);
 
-    const usersStore = getNetlifyStore({
-      name: 'users',
-    });
-
-    const userRecord = (await usersStore.get(tokenPayload.email, {
-      type: 'json',
-    })) as Nullable<UserRecord>;
-
+    const userRecord = await netlifyStores.users.get(tokenPayload.email);
     if (!userRecord || userRecord.status === 'active') {
       return {
         status: 'error',
@@ -36,7 +29,7 @@ export const handler = createHandler({ allowMethods: ['POST'] }, async ({ event 
       };
     }
 
-    await usersStore.setJSON(userRecord.email, { ...userRecord, status: 'active' });
+    await netlifyStores.users.setJSON(userRecord.email, { ...userRecord, status: 'active' });
 
     return {
       status: 'ok',

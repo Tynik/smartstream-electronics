@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import type { ConfirmEmailTokenPayload, Nullable, UserRecord } from '../netlify.types';
+import type { ConfirmEmailTokenPayload } from '../netlify.types';
 import { EMAIL_CONFIRMATION_TOKEN_EXPIRATION, URL } from '../netlify.constants';
 import { createHandler, sendEmail } from '../netlify.helpers';
-import { getNetlifyStore } from '../netlify-store.helpers';
 import { createToken, hashPassword } from '../netlify-crypto.helpers';
+import { netlifyStores } from '../netlify-store';
 
 type SignupPayload = {
   firstName: string;
@@ -36,14 +36,6 @@ export const handler = createHandler<SignupPayload>(
       };
     }
 
-    const usersStore = getNetlifyStore({
-      name: 'users',
-    });
-
-    const existedUserRecord = (await usersStore.get(payload.email, {
-      type: 'json',
-    })) as Nullable<UserRecord>;
-
     const sendSignUpConfirmationEmail = () => {
       const token = createToken<ConfirmEmailTokenPayload>(
         {
@@ -68,6 +60,7 @@ export const handler = createHandler<SignupPayload>(
       });
     };
 
+    const existedUserRecord = await netlifyStores.users.get(payload.email);
     if (existedUserRecord) {
       if (existedUserRecord.status === 'inactive') {
         await sendSignUpConfirmationEmail();
@@ -92,7 +85,7 @@ export const handler = createHandler<SignupPayload>(
       };
     }
 
-    const newUserRecord: UserRecord = {
+    await netlifyStores.users.setJSON(payload.email, {
       id: uuidv4(),
       stripeCustomerId: null,
       role: 'buyer',
@@ -104,9 +97,8 @@ export const handler = createHandler<SignupPayload>(
       status: 'inactive',
       created: Date.now(),
       updated: null,
-    };
+    });
 
-    await usersStore.setJSON(payload.email, newUserRecord);
     await sendSignUpConfirmationEmail();
 
     return {

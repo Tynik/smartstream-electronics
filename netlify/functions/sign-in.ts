@@ -1,8 +1,7 @@
-import type { Nullable, UserRecord } from '../netlify.types';
 import { createHandler } from '../netlify.helpers';
 import { createToken, hashPassword } from '../netlify-crypto.helpers';
-import { getNetlifyStore } from '../netlify-store.helpers';
 import { AUTH_TOKEN_EXPIRATION, IS_LOCAL_ENV } from '../netlify.constants';
+import { netlifyStores } from '../netlify-store';
 
 type LoginPayload = {
   email: string;
@@ -22,14 +21,7 @@ export const handler = createHandler<LoginPayload>(
       };
     }
 
-    const usersStore = getNetlifyStore({
-      name: 'users',
-    });
-
-    const userRecord = (await usersStore.get(payload.email, {
-      type: 'json',
-    })) as Nullable<UserRecord>;
-
+    const userRecord = await netlifyStores.users.get(payload.email);
     if (!userRecord || userRecord.status === 'inactive') {
       return {
         status: 'error',

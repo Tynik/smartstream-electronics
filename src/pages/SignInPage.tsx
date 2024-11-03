@@ -72,11 +72,9 @@ export const SignInPage = () => {
 
               <TextInput
                 label="* Password"
-                inputProps={{
-                  type: 'password',
-                }}
                 error={formFields.password.errors[0]?.message}
                 {...formFields.password.props}
+                type="password"
               />
 
               <HoneyBox $display="flex" $gap={2} $alignItems="center">

@@ -1,6 +1,7 @@
-import type { CreateHandlerFunction, CreateHandlerFunctionOptions } from './netlify.helpers';
-import { verifyToken } from './netlify-crypto.helpers';
 import type { AuthTokenPayload } from './netlify.types';
+import type { CreateHandlerFunction, CreateHandlerFunctionOptions } from './netlify.helpers';
+import { NetlifyError } from './netlify-errors';
+import { verifyToken } from './netlify-crypto.helpers';
 
 export const withCredentials = <Payload = unknown>(
   fn: (
@@ -27,6 +28,10 @@ export const withCredentials = <Payload = unknown>(
 
       return await fn({ ...options, tokenPayload });
     } catch (e) {
+      if (e instanceof NetlifyError) {
+        throw e;
+      }
+
       return {
         status: 'error',
         statusCode: 401,
