@@ -4,18 +4,23 @@ import { HoneyForm } from '@react-hive/honey-form';
 import { HoneyFlexBox, HoneyList } from '@react-hive/honey-layout';
 import { useNavigate } from 'react-router-dom';
 
-import type { UploadedFile } from '~/api';
+import type { Category, UploadedFile } from '~/api';
 import { MANAGE_PRODUCTS_ROUTE_PATH } from '~/constants';
 import { addProduct, deleteFile, handlerApiError, uploadFile } from '~/api';
 import { SelectCategory } from '~/features';
 import { Button, Panel, SelectFilesWrapper } from '~/components';
 import { ProductImagePreview } from './components';
+import { assert } from '~/helpers';
 
 type AddProductFormData = {
+  category: Category | undefined;
   images: File[] | undefined;
 };
 
 const ADD_PRODUCT_FORM_FIELDS: HoneyFormFieldsConfig<AddProductFormData> = {
+  category: {
+    type: 'object',
+  },
   images: {
     type: 'file',
   },
@@ -25,13 +30,15 @@ export const AddProductPage = () => {
   const navigate = useNavigate();
 
   const handleAddProduct: HoneyFormOnSubmit<AddProductFormData> = async data => {
+    assert(data.category, 'Must be set');
+
     let uploadedImages: UploadedFile[] = [];
 
     try {
       uploadedImages = await Promise.all(data.images?.map(file => uploadFile(file, 'image')) ?? []);
 
       await addProduct({
-        categoryId: '8175ba0b-862f-424b-97d1-fd12f63411d8',
+        categoryId: data.category.id,
         stripeProductId: null,
         title: 'test',
         subtitle: null,
@@ -71,7 +78,7 @@ export const AddProductPage = () => {
               {image => <ProductImagePreview image={image} />}
             </HoneyList>
 
-            <SelectCategory />
+            <SelectCategory value={formValues.category} onChange={formFields.category.setValue} />
 
             <Button disabled={!isFormSubmitAllowed} type="submit" $marginLeft="auto">
               Add
