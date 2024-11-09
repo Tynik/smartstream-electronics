@@ -1,8 +1,8 @@
 import type { Handler, HandlerResponse, HandlerEvent, HandlerContext } from '@netlify/functions';
 
 import type { Nullable } from './netlify.types';
-import { NetlifyStoreConstraintError } from './netlify-store/netlify-store-errors';
 import { URL, NETLIFY_EMAILS_SECRET, SITE_DOMAIN } from './netlify.constants';
+import { NetlifyStoreError } from './netlify-store/netlify-store-errors';
 
 type HTTPMethod = 'POST' | 'GET' | 'OPTIONS' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -168,7 +168,7 @@ export const createHandler = <Payload = unknown>(
         allowMethods: options?.allowMethods,
       });
     } catch (e) {
-      if (e instanceof NetlifyStoreConstraintError) {
+      if (e instanceof NetlifyStoreError) {
         const { statusCode, ...result } = e.details;
 
         return createResponse(result, {

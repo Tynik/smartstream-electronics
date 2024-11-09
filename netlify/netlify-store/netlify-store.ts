@@ -1,42 +1,87 @@
 import type { ListOptions } from '@netlify/blobs';
-import type { GetNetlifyStoreRecordsOptions } from '../netlify-store.helpers';
+import { getStorage } from 'firebase-admin/storage';
+import type { GetNetlifyStoreRecordsOptions } from './netlify-store.helpers';
 import type {
+  ApplicationRecord,
+  CategoryRecord,
+  DatasheetRecord,
   FeatureCategoryRecord,
   FeatureRecord,
+  FileRecord,
+  ManufacturerRecord,
+  MeasurementRecord,
   Nullable,
+  ProductFeatureRecord,
+  ProductFileRecord,
   ProductRecord,
   UserRecord,
 } from '../netlify.types';
-import { NetlifyStoreConstraintError } from './netlify-store-errors';
-import { getNetlifyStore, getNetlifyStoreRecords } from '../netlify-store.helpers';
+import { NetlifyStoreError } from './netlify-store-errors';
+import { getNetlifyStore, getNetlifyStoreRecords } from './netlify-store.helpers';
 import { camelToDashCase } from '../netlify.utils';
-import { createHexHash } from '../netlify-crypto.helpers';
+import {
+  cleanupStoreRecordConstraints,
+  NETLIFY_STORE_CONSTRAINTS_PROCESSORS_MAP,
+} from './netlify-store-constraints';
+import { initFirebaseApp } from '../netlify-firebase.helpers';
+import { FIREBASE_BUCKET_NAME } from '../netlify.constants';
 
-type StringKeys<T> = {
-  [K in keyof T]: T[K] extends string ? K : never;
+type NullableStringKeys<T> = {
+  [K in keyof T]: T[K] extends Nullable<string> ? K : never;
 }[keyof T];
 
-type NetlifyStoreName = string;
+export type DashCase<T extends string> = T extends `${infer First}-${infer Rest}`
+  ? `${Lowercase<First>}-${DashCase<Rest>}`
+  : Lowercase<T>;
 
-type NetlifyStoreRecord = object;
+export type NetlifyStoreName = string;
 
-type NetlifyStoreConstraintType = 'unique' | 'foreignKey';
+export type NetlifyStoreRecord = object;
 
-type NetlifyStoreConfigUniqueConstraint<
-  StoresDefinition extends NetlifyStoresDefinition,
-  StoreName extends keyof StoresDefinition,
-> = {
+type NetlifyStoreEnhancedRecordConstraint = {
   type: 'unique';
-  fields: StringKeys<StoresDefinition[StoreName]>[];
+  key: string;
 };
 
-type NetlifyStoreConfigForeignKeyConstraint<
+export type NetlifyStoreEnhancedRecord<StoreRecord extends NetlifyStoreRecord> = StoreRecord & {
+  __constraints__: NetlifyStoreEnhancedRecordConstraint[];
+};
+
+export type NetlifyStoreConstraintType = 'unique' | 'foreignKey';
+
+type RevertConstraintProcessor = () => Promise<void>;
+
+export type NetlifyStoreConstraintProcessor<
+  StoresDefinition extends NetlifyStoresDefinition,
+  Constraint extends NetlifyStoreConfigConstraint<StoresDefinition, StoreName>,
+  StoreName extends keyof StoresDefinition = keyof StoresDefinition,
+> = (
+  storeName: DashCase<NetlifyStoreName>,
+  constraint: Constraint,
+  record: NetlifyStoreEnhancedRecord<Partial<StoresDefinition[StoreName]>>,
+) => Promise<RevertConstraintProcessor>;
+
+export type NetlifyStoreConfigUniqueConstraint<
+  StoresDefinition extends NetlifyStoresDefinition,
+  StoreName extends keyof StoresDefinition = keyof StoresDefinition,
+> = {
+  type: 'unique';
+  fields: NullableStringKeys<StoresDefinition[StoreName]>[];
+};
+
+export type NetlifyStoreConfigForeignKeyConstraint<
   StoresDefinition extends NetlifyStoresDefinition,
   StoreName extends keyof StoresDefinition,
 > = {
   type: 'foreignKey';
-  field: StringKeys<StoresDefinition[StoreName]>;
+  field:
+    | NullableStringKeys<StoresDefinition[StoreName]>
+    | NullableStringKeys<StoresDefinition[StoreName]>[];
   store: Exclude<keyof StoresDefinition, StoreName>;
+  /**
+   * @default false
+   */
+  isAllowEmpty?: boolean;
 };
 
 type NetlifyStoreConfigConstraint<
@@ -51,129 +96,61 @@ type NetlifyStoreConfig<
   StoreName extends keyof StoresDefinition,
 > = {
   constraints?: NetlifyStoreConfigConstraint<StoresDefinition, StoreName>[];
+  onAfterDelete?: (
+    record: NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>,
+  ) => Promise<void>;
 };
 
-type NetlifyStoresDefinition = Record<NetlifyStoreName, NetlifyStoreRecord>;
+export type NetlifyStoresDefinition = Record<NetlifyStoreName, NetlifyStoreRecord>;
 
 type NetlifyStoresConfig<StoresDefinition extends NetlifyStoresDefinition> = {
   [StoreName in keyof StoresDefinition]: NetlifyStoreConfig<StoresDefinition, StoreName>;
 };
 
 type NetlifyStoreApi<StoreRecord extends NetlifyStoreRecord> = {
-  get: (key: string) => Promise<Nullable<StoreRecord>>;
-
-  setJSON: (key: string, record: StoreRecord) => Promise<void>;
-
-  getRecords: (
+  get: (key: string) => Promise<Nullable<NetlifyStoreEnhancedRecord<StoreRecord>>>;
+  create: (key: string, record: StoreRecord) => Promise<NetlifyStoreEnhancedRecord<StoreRecord>>;
+  update: (
+    key: string,
+    record: Partial<StoreRecord>,
+  ) => Promise<NetlifyStoreEnhancedRecord<StoreRecord>>;
+  delete: (key: string) => Promise<void>;
+  getList: (
     listOptions?: Omit<ListOptions, 'paginate'>,
     options?: GetNetlifyStoreRecordsOptions,
-  ) => Promise<StoreRecord[]>;
+  ) => Promise<NetlifyStoreEnhancedRecord<StoreRecord>[]>;
 };
 
 type NetlifyStoresApi<StoresDefinition extends NetlifyStoresDefinition> = {
   [StoreName in keyof StoresDefinition]: NetlifyStoreApi<StoresDefinition[StoreName]>;
 };
 
-type RevertConstraintProcessor = () => Promise<void>;
-
-type ConstraintProcessor<
-  StoresDefinition extends NetlifyStoresDefinition,
-  Constraint extends NetlifyStoreConfigConstraint<StoresDefinition, StoreName>,
-  StoreName extends keyof StoresDefinition = keyof StoresDefinition,
-> = (
-  storeName: NetlifyStoreName,
-  constraint: Constraint,
-  record: StoresDefinition[StoreName],
-) => Promise<RevertConstraintProcessor>;
-
-const uniqueConstraintProcessor: ConstraintProcessor<
-  NetlifyStoresDefinition,
-  NetlifyStoreConfigUniqueConstraint<NetlifyStoresDefinition, NetlifyStoreName>
-> = async (storeName, constraint, record) => {
-  const uniqueConstraintStore = getNetlifyStore({
-    name: `${storeName}-${constraint.fields.join('-')}-unique-constraint`,
-  });
-
-  const hashedFieldValue = createHexHash(
-    constraint.fields.map(fieldName => record[fieldName]).join('-'),
-  );
-
-  const existingFeatureCategory = await uniqueConstraintStore.get(hashedFieldValue);
-  if (existingFeatureCategory) {
-    throw new NetlifyStoreConstraintError({
-      status: 'error',
-      statusCode: 409,
-      data: {
-        error: 'Record already exists',
-      },
-    });
-  }
-
-  await uniqueConstraintStore.set(hashedFieldValue, '1');
-
-  return async () => {
-    await uniqueConstraintStore.delete(hashedFieldValue);
-  };
-};
-
-const foreignKeyConstraintProcessor: ConstraintProcessor<
-  NetlifyStoresDefinition,
-  NetlifyStoreConfigForeignKeyConstraint<NetlifyStoresDefinition, NetlifyStoreName>
-> = async (storeName, constraint, record) => {
-  const foreignStore = getNetlifyStore({
-    name: camelToDashCase(constraint.store),
-  });
-
-  const foreignRecord = await foreignStore.get(record[constraint.field]);
-  if (!foreignRecord) {
-    throw new NetlifyStoreConstraintError({
-      status: 'error',
-      statusCode: 409,
-      data: {
-        error: 'Foreign record does not exist',
-      },
-    });
-  }
-
-  return async () => {
-    //
-  };
-};
-
-const NETLIFY_STORE_CONSTRAINTS_PROCESSORS_MAP: Record<
-  NetlifyStoreConstraintType,
-  ConstraintProcessor<NetlifyStoresDefinition, any>
-> = {
-  unique: uniqueConstraintProcessor,
-  foreignKey: foreignKeyConstraintProcessor,
-};
-
 const createStoreApi = <
   StoresDefinition extends NetlifyStoresDefinition,
-  StoreRecord extends NetlifyStoreRecord,
   StoreName extends keyof StoresDefinition,
 >(
   storeName: StoreName,
   storeConfig: NetlifyStoreConfig<StoresDefinition, StoreName>,
-): NetlifyStoreApi<StoreRecord> => {
-  const netlifyStoreName = camelToDashCase(String(storeName));
+): NetlifyStoreApi<StoresDefinition[StoreName]> => {
+  const netlifyStoreName = camelToDashCase(String(storeName)) as DashCase<NetlifyStoreName>;
 
   const store = getNetlifyStore({
     name: netlifyStoreName,
   });
 
-  const get = async (key: string) => {
-    return (await store.get(key, {
-      type: 'json',
-    })) as Nullable<StoreRecord>;
-  };
+  const executeConstraints = async <Record extends Partial<StoresDefinition[StoreName]>>(
+    record: Record,
+  ) => {
+    const enhancedRecord: NetlifyStoreEnhancedRecord<Record> = {
+      ...record,
+      __constraints__: [],
+    };
 
-  const setJSON = async (key: string, record: StoreRecord) => {
     const constraintTasksResult = await Promise.allSettled(
       storeConfig.constraints?.map(async constraint => {
         const constraintProcessor = NETLIFY_STORE_CONSTRAINTS_PROCESSORS_MAP[constraint.type];
 
-        return constraintProcessor(netlifyStoreName, constraint, record);
+        return constraintProcessor(netlifyStoreName, constraint, enhancedRecord);
       }) ?? [],
     );
 
@@ -197,18 +174,90 @@ const createStoreApi = <
       throw failedConstraintTasks[0].reason;
     }
 
-    return store.setJSON(key, record);
+    return enhancedRecord;
   };
 
-  const getRecords = <T>(
+  const get = async (key: string) => {
+    return (await store.get(key, {
+      type: 'json',
+    })) as Nullable<NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>>;
+  };
+
+  const create = async (key: string, record: StoresDefinition[StoreName]) => {
+    const enhancedRecord = await executeConstraints(record);
+
+    await store.setJSON(key, enhancedRecord);
+
+    return enhancedRecord;
+  };
+
+  const update = async (key: string, record: Partial<StoresDefinition[StoreName]>) => {
+    const enhancedRecord = await executeConstraints(record);
+
+    const previousRecord = (await store.get(key, {
+      type: 'json',
+    })) as Nullable<NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>>;
+
+    if (!previousRecord) {
+      throw new NetlifyStoreError({
+        status: 'error',
+        statusCode: 400,
+        data: {
+          error: `Record by the key "${key}" does not exist`,
+        },
+      });
+    }
+
+    await cleanupStoreRecordConstraints(previousRecord);
+
+    const nextRecord = {
+      ...previousRecord,
+      ...enhancedRecord,
+      // Merge constraints
+      __constraints__: [...previousRecord.__constraints__, ...enhancedRecord.__constraints__],
+    };
+
+    await store.setJSON(key, nextRecord);
+
+    return nextRecord;
+  };
+
+  const deleteRecord = async (key: string) => {
+    const record = (await store.get(key, {
+      type: 'json',
+    })) as Nullable<NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>>;
+
+    if (!record) {
+      throw new NetlifyStoreError({
+        status: 'error',
+        statusCode: 400,
+        data: {
+          error: `Record by the key "${key}" does not exist`,
+        },
+      });
+    }
+
+    await Promise.all([cleanupStoreRecordConstraints(record), store.delete(key)]);
+
+    await storeConfig.onAfterDelete?.(record);
+  };
+
+  const getList = (
     listOptions?: Omit<ListOptions, 'paginate'>,
     options?: GetNetlifyStoreRecordsOptions,
-  ) => getNetlifyStoreRecords<T>(store, listOptions, options);
+  ) =>
+    getNetlifyStoreRecords<NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>>(
+      store,
+      listOptions,
+      options,
+    );
 
   return {
     get,
-    setJSON,
-    getRecords,
+    create,
+    update,
+    getList,
+    delete: deleteRecord,
   };
 };
 
@@ -229,14 +278,65 @@ export const defineNetlifyStores = <StoresDefinition extends NetlifyStoresDefini
 
 type NetlifyStores = {
   users: UserRecord;
+  files: FileRecord;
+  measurements: MeasurementRecord;
+  manufacturers: ManufacturerRecord;
+  applications: ApplicationRecord;
+  datasheets: DatasheetRecord;
+  categories: CategoryRecord;
   featureCategories: FeatureCategoryRecord;
   features: FeatureRecord;
   products: ProductRecord;
+  productFiles: ProductFileRecord;
+  productFeatures: ProductFeatureRecord;
 };
+
+initFirebaseApp();
 
 export const netlifyStores = defineNetlifyStores<NetlifyStores>({
   users: {
     //
+  },
+  files: {
+    onAfterDelete: async fileRecord => {
+      const storage = getStorage();
+      const bucket = storage.bucket(FIREBASE_BUCKET_NAME);
+
+      const file = bucket.file(fileRecord.path);
+      await file.delete();
+    },
+  },
+  measurements: {
+    //
+  },
+  manufacturers: {
+    //
+  },
+  applications: {
+    //
+  },
+  datasheets: {
+    constraints: [
+      {
+        type: 'foreignKey',
+        field: 'fileId',
+        store: 'files',
+      },
+      {
+        type: 'foreignKey',
+        field: 'manufacturerId',
+        store: 'manufacturers',
+        isAllowEmpty: true,
+      },
+    ],
+  },
+  categories: {
+    constraints: [
+      {
+        type: 'unique',
+        fields: ['name'],
+      },
+    ],
   },
   featureCategories: {
     constraints: [
@@ -254,12 +354,51 @@ export const netlifyStores = defineNetlifyStores<NetlifyStores>({
         store: 'featureCategories',
       },
       {
+        type: 'foreignKey',
+        field: 'measurementId',
+        store: 'measurements',
+      },
+      {
         type: 'unique',
         fields: ['categoryId', 'name'],
       },
     ],
   },
   products: {
-    //
+    constraints: [
+      {
+        type: 'foreignKey',
+        field: 'categoryId',
+        store: 'categories',
+      },
+    ],
+  },
+  productFiles: {
+    constraints: [
+      {
+        type: 'foreignKey',
+        field: ['categoryId', 'productId'],
+        store: 'products',
+      },
+      {
+        type: 'foreignKey',
+        field: 'fileId',
+        store: 'files',
+      },
+    ],
+  },
+  productFeatures: {
+    constraints: [
+      {
+        type: 'foreignKey',
+        field: 'productId',
+        store: 'products',
+      },
+      {
+        type: 'foreignKey',
+        field: 'featureId',
+        store: 'features',
+      },
+    ],
   },
 });

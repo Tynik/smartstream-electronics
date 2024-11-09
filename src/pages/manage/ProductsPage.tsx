@@ -18,6 +18,8 @@ export const ProductsPage = () => {
     return <Loading $margin="auto" />;
   }
 
+  console.log(products);
+
   return (
     <Panel title="Products">
       <Button onClick={() => navigate(MANAGE_ADD_PRODUCT_ROUTE_PATH)} $marginLeft="auto">

@@ -1,18 +1,21 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import type { FeatureCategoryId, FeatureRecord } from '../netlify.types';
+import type { FeatureCategoryId, FeatureRecord, MeasurementId } from '../netlify.types';
 import { createHandler } from '../netlify.helpers';
-import { withCredentials } from '../netlify-auth.helpers';
+import { assertUserRole, withCredentials } from '../netlify-auth.helpers';
 import { netlifyStores } from '../netlify-store';
 
 type AddFeaturePayload = {
   categoryId: FeatureCategoryId;
+  measurementId: MeasurementId;
   name: string;
 };
 
 export const handler = createHandler<AddFeaturePayload>(
   { allowMethods: ['POST'] },
-  withCredentials(async ({ payload }) => {
+  withCredentials(async ({ payload, userRecord }) => {
+    assertUserRole(userRecord, 'admin');
+
     if (!payload) {
       return {
         status: 'error',
@@ -26,14 +29,11 @@ export const handler = createHandler<AddFeaturePayload>(
     const featureRecord: FeatureRecord = {
       id: uuidv4(),
       categoryId: payload.categoryId,
-      measurementId: '',
+      measurementId: payload.measurementId,
       name: payload.name,
     };
 
-    await netlifyStores.features.setJSON(
-      `${payload.categoryId}/${featureRecord.id}`,
-      featureRecord,
-    );
+    await netlifyStores.features.create(`${payload.categoryId}/${featureRecord.id}`, featureRecord);
 
     return {
       status: 'ok',

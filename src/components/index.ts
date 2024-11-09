@@ -10,3 +10,5 @@ export * from './Alert';
 export * from './Panel';
 export * from './Loading';
 export * from './Dialog';
+export * from './Image';
+export * from './SelectFilesWrapper';

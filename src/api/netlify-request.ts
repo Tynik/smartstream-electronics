@@ -1,14 +1,21 @@
 import type { HTTPRequestMethod } from '~/types';
 
 export type NetlifyFunction =
+  | 'add-category'
+  | 'get-categories'
+  | 'update-category'
+  | 'delete-category'
   | 'get-product'
   | 'get-products'
   | 'add-feature-category'
   | 'get-feature-categories'
   | 'update-feature-category'
   | 'delete-feature-category'
+  | 'upload-file'
+  | 'delete-file'
   | 'get-features'
   | 'add-feature'
+  | 'add-product'
   | 'sign-in'
   | 'sign-up'
   | 'verify-auth-token'
@@ -40,7 +47,9 @@ export const netlifyRequest = async <Response, Payload = unknown>(
 ): Promise<NetlifyRequestResponse<Response>> => {
   let body: BodyInit | null = null;
 
-  if (payload instanceof FormData) {
+  const isFormData = payload instanceof FormData;
+
+  if (isFormData) {
     body = payload;
     //
   } else if (payload) {
@@ -61,9 +70,11 @@ export const netlifyRequest = async <Response, Payload = unknown>(
       method,
       body,
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: isFormData
+        ? {}
+        : {
+            'Content-Type': 'application/json',
+          },
       ...request,
     },
   );

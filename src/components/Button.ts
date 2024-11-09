@@ -1,7 +1,11 @@
 import styled, { css } from 'styled-components';
 import type { ButtonHTMLAttributes } from 'react';
-import type { HoneyBoxProps, HoneyCSSDimensionValue } from '@react-hive/honey-layout';
-import { HoneyBox } from '@react-hive/honey-layout';
+import {
+  HoneyBoxProps,
+  HoneyCSSDimensionValue,
+  resolveSpacing,
+  HoneyBox,
+} from '@react-hive/honey-layout';
 
 type ButtonSize = 'small' | 'medium' | 'large';
 
@@ -16,15 +20,22 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
     size?: ButtonSize;
   };
 
-export const Button = styled(HoneyBox).attrs<ButtonProps>(({ type }) => ({
-  as: 'button',
+export const Button = styled(HoneyBox).attrs<ButtonProps>(({ type, as }) => ({
+  as: as ?? 'button',
   type: type ?? 'button',
 }))<ButtonProps>`
-  ${({ size = 'medium' }) => css`
+  ${({ size = 'medium', theme: { colors } }) => css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     width: ${sizeMap[size]};
     height: 34px;
 
     flex-shrink: 0;
+
+    border-radius: 4px;
+    border: 1px solid ${colors.secondary.mediumLightGray};
 
     &:not(:disabled) {
       cursor: pointer;

@@ -13,7 +13,7 @@ export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }
     };
   }
 
-  const featureRecords = await netlifyStores.features.getRecords({
+  const featureRecords = await netlifyStores.features.getList({
     prefix: categoryId,
   });
 

@@ -1,4 +1,4 @@
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 export type Nullable<T> = T | null;
 
@@ -39,6 +39,8 @@ export type UserRole = 'admin' | 'buyer';
 export type UserStatus = 'active' | 'inactive';
 
 export type OrderStatus = 'pending' | 'processed' | 'canceled' | 'archived';
+
+export type UploadFileType = 'image' | 'datasheet';
 
 export type AuthTokenPayload = {
   email: string;
@@ -86,6 +88,17 @@ export type UserBillingAddressRecord = {
 
 export type FileRecord = {
   id: FileId;
+  name: string;
+  type: string;
+  path: string;
+  url: string;
+};
+
+export type CategoryRecord = {
+  id: CategoryId;
+  name: string;
+  icon: Nullable<string>;
+  isVisible: boolean;
 };
 
 export type MeasurementRecord = {
@@ -113,13 +126,6 @@ export type ApplicationRecord = {
   name: string;
 };
 
-export type CategoryRecord = {
-  id: CategoryId;
-  name: string;
-  icon: string;
-  isVisible: boolean;
-};
-
 export type FeatureCategoryRecord = {
   id: FeatureCategoryId;
   name: string;
@@ -139,22 +145,28 @@ type ProductSeoRecord = {
 
 export type ProductRecord = {
   id: ProductId;
-  categoryId: CategoryRecord;
-  stripeProductId: StripeProductId;
+  categoryId: CategoryId;
+  stripeProductId: Nullable<StripeProductId>;
+  applicationIds: ApplicationId[];
   title: string;
   subtitle: Nullable<string>;
   seo: ProductSeoRecord;
-  images: unknown[];
   content: string;
   totalQuantity: number;
-  datasheetId: Nullable<DatasheetId>;
-  applications: ApplicationRecord[];
+};
+
+export type ProductFileRecord = {
+  id: string;
+  categoryId: CategoryId;
+  productId: ProductId;
+  fileId: FileId;
+  type: 'image' | 'datasheet' | 'manual' | 'schema';
 };
 
 export type ProductFeatureRecord = {
   id: ProductFeatureId;
-  featureId: FeatureId;
   productId: ProductId;
+  featureId: FeatureId;
   value: string;
 };
 

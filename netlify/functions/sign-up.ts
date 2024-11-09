@@ -85,7 +85,7 @@ export const handler = createHandler<SignupPayload>(
       };
     }
 
-    await netlifyStores.users.setJSON(payload.email, {
+    await netlifyStores.users.create(payload.email, {
       id: uuidv4(),
       stripeCustomerId: null,
       role: 'buyer',

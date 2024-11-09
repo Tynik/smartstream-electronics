@@ -3,7 +3,11 @@ import { NavLink } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 import { bpMedia, resolveSpacing, useHoneyLayout } from '@react-hive/honey-layout';
 
-import { MANAGE_FEATURES_ROUTE_PATH, MANAGE_PRODUCTS_ROUTE_PATH } from '~/constants';
+import {
+  MANAGE_CATEGORIES_ROUTE_PATH,
+  MANAGE_FEATURES_ROUTE_PATH,
+  MANAGE_PRODUCTS_ROUTE_PATH,
+} from '~/constants';
 import { useCurrentApp } from '~/providers';
 
 export const MENU_WIDTH = '300px';
@@ -111,6 +115,12 @@ export const Menu = () => {
 
   const menuItems = useMemo<MenuItem[]>(
     () => [
+      {
+        id: 'manage-categories',
+        title: 'Categories',
+        to: MANAGE_CATEGORIES_ROUTE_PATH,
+        isVisible: accountProfile?.role === 'admin',
+      },
       {
         id: 'manage-products',
         title: 'Products',

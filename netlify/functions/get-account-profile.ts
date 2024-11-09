@@ -1,6 +1,5 @@
 import { createHandler } from '../netlify.helpers';
 import { withCredentials } from '../netlify-auth.helpers';
-import { netlifyStores } from '../netlify-store';
 
 type SignupPayload = {
   firstName: string;
@@ -11,18 +10,7 @@ type SignupPayload = {
 
 export const handler = createHandler<SignupPayload>(
   { allowMethods: ['GET'] },
-  withCredentials(async ({ tokenPayload }) => {
-    const userRecord = await netlifyStores.users.get(tokenPayload.email);
-    if (!userRecord || userRecord.status === 'inactive') {
-      return {
-        status: 'error',
-        statusCode: 400,
-        data: {
-          error: 'User not found or inactive',
-        },
-      };
-    }
-
+  withCredentials(async ({ userRecord }) => {
     return {
       status: 'ok',
       data: {

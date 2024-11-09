@@ -14,9 +14,9 @@ import { toast } from 'react-toastify';
 import type { Nullable } from '~/types';
 import type { FeatureCategory } from '~/api';
 import type { FeatureCategoryFormData } from '~/pages';
+import { assert } from '~/helpers';
 import { getFeatures, updateFeatureCategory, getFeatureCategories, handlerApiError } from '~/api';
 import { Button, Loading, Dialog, Panel, TextInput } from '~/components';
-import { assert } from '~/helpers';
 import {
   AddFeatureDialog,
   FeatureCategoryListItem,
@@ -36,6 +36,7 @@ export const FeaturesPage = () => {
   const {
     data: featureCategories,
     isInitialLoading: isFeatureCategoriesLoading,
+    isError: isFeatureCategoriesError,
     refetch: refetchFeatureCategories,
   } = useQuery({
     queryKey: ['feature-categories'],
@@ -45,6 +46,7 @@ export const FeaturesPage = () => {
   const {
     data: features,
     isInitialLoading: isFeaturesLoading,
+    isError: isFeaturesError,
     refetch: refetchFeatures,
   } = useQuery({
     queryKey: ['feature', selectedFeatureCategory?.id],
@@ -94,6 +96,7 @@ export const FeaturesPage = () => {
           <HoneyList
             items={featureCategories}
             isLoading={isFeatureCategoriesLoading}
+            isError={isFeatureCategoriesError}
             itemKey="id"
             $gap={1}
             loadingContent="Loading..."
@@ -129,6 +132,7 @@ export const FeaturesPage = () => {
             <HoneyList
               items={features}
               isLoading={isFeaturesLoading}
+              isError={isFeaturesError}
               itemKey="id"
               $gap={1}
               loadingContent="Loading..."

@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type { FeatureCategoryRecord } from '../netlify.types';
 import { createHandler } from '../netlify.helpers';
-import { withCredentials } from '../netlify-auth.helpers';
+import { assertUserRole, withCredentials } from '../netlify-auth.helpers';
 import { netlifyStores } from '../netlify-store';
 
 type AddFeatureCategoryPayload = {
@@ -11,7 +11,9 @@ type AddFeatureCategoryPayload = {
 
 export const handler = createHandler<AddFeatureCategoryPayload>(
   { allowMethods: ['POST'] },
-  withCredentials(async ({ payload }) => {
+  withCredentials(async ({ payload, userRecord }) => {
+    assertUserRole(userRecord, 'admin');
+
     if (!payload) {
       return {
         status: 'error',
@@ -27,7 +29,7 @@ export const handler = createHandler<AddFeatureCategoryPayload>(
       name: payload.name,
     };
 
-    await netlifyStores.featureCategories.setJSON(featureCategoryRecord.id, featureCategoryRecord);
+    await netlifyStores.featureCategories.create(featureCategoryRecord.id, featureCategoryRecord);
 
     return {
       status: 'ok',

@@ -26,7 +26,7 @@ export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }
     };
   }
 
-  const productRecords = await netlifyStores.products.getRecords(
+  const productRecords = await netlifyStores.products.getList(
     {
       prefix: categoryId,
     },
@@ -38,6 +38,23 @@ export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }
 
   return {
     status: 'ok',
-    data: productRecords,
+    data: await Promise.all(
+      productRecords.map(async productRecord => {
+        const productFilesRecords = await netlifyStores.productFiles.getList({
+          prefix: productRecord.id,
+        });
+
+        const fileRecords = await Promise.all(
+          productFilesRecords.map(productFilesRecord =>
+            netlifyStores.files.get(productFilesRecord.fileId),
+          ),
+        );
+
+        return {
+          ...productRecord,
+          files: fileRecords.map(fileRecord => fileRecord?.url),
+        };
+      }),
+    ),
   };
 });

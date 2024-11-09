@@ -29,7 +29,7 @@ export const handler = createHandler({ allowMethods: ['POST'] }, async ({ event 
       };
     }
 
-    await netlifyStores.users.setJSON(userRecord.email, { ...userRecord, status: 'active' });
+    await netlifyStores.users.create(userRecord.email, { ...userRecord, status: 'active' });
 
     return {
       status: 'ok',

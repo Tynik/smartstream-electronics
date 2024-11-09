@@ -24,6 +24,7 @@ export const AddFeatureDialog = ({ categoryId, onSuccess, ...props }: AddFeature
     try {
       await addFeature({
         categoryId,
+        measurementId: '0000-0000-0000-0000',
         name: data.name,
       });
 

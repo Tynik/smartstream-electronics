@@ -4,6 +4,7 @@ import React from 'react';
 import { PROFILE_ROUTE_PATH, SIGN_IN_ROUTE_PATH, SIGN_UP_ROUTE_PATH } from '~/constants';
 import {
   AddProductPage,
+  CategoriesPage,
   EmailConfirmationPage,
   FeaturesPage,
   ProductsPage,
@@ -29,6 +30,7 @@ export const AppRoutes = () => {
 
           {accountProfile.role === 'admin' && (
             <Route path="/manage/*">
+              <Route path="categories" element={<CategoriesPage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="features" element={<FeaturesPage />} />
               <Route path="products/add" element={<AddProductPage />} />
