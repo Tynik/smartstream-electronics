@@ -55,4 +55,5 @@ export type Product = {
   subtitle: Nullable<string>;
   content: string;
   totalQuantity: number;
+  files: string[];
 };

@@ -17,7 +17,7 @@ export const ProductImagePreview = ({ image }: ProductImagePreviewProps) => {
       $borderColor="secondary.softGray"
       $overflow="hidden"
     >
-      <Image file={image} />
+      <Image src={image} />
     </HoneyBox>
   );
 };

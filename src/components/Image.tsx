@@ -11,15 +11,17 @@ const ImageStyled = styled.img`
 `;
 
 type ImageProps = {
-  file: File;
+  src: File | string;
 };
 
-export const Image = ({ file }: ImageProps) => {
-  const objectUrl = useObjectUrl(file);
+export const Image = ({ src }: ImageProps) => {
+  const objectUrl = useObjectUrl(typeof src === 'string' ? undefined : src);
 
-  if (!objectUrl) {
+  const imgSrc = typeof src === 'string' ? src : objectUrl;
+
+  if (!imgSrc) {
     return null;
   }
 
-  return <ImageStyled src={objectUrl} alt="" />;
+  return <ImageStyled src={imgSrc} alt="" />;
 };
