@@ -36,25 +36,29 @@ export const handler = createHandler({ allowMethods: ['GET'] }, async ({ event }
     },
   );
 
+  const list = await Promise.all(
+    productRecords.map(async productRecord => {
+      const productFilesRecords = await netlifyStores.productFiles.getList({
+        prefix: productRecord.id,
+      });
+
+      const fileRecords = await Promise.all(
+        productFilesRecords.map(productFilesRecord =>
+          netlifyStores.files.get(productFilesRecord.fileId),
+        ),
+      );
+
+      return {
+        ...productRecord,
+        files: fileRecords,
+      };
+    }),
+  );
+
   return {
     status: 'ok',
-    data: await Promise.all(
-      productRecords.map(async productRecord => {
-        const productFilesRecords = await netlifyStores.productFiles.getList({
-          prefix: productRecord.id,
-        });
-
-        const fileRecords = await Promise.all(
-          productFilesRecords.map(productFilesRecord =>
-            netlifyStores.files.get(productFilesRecord.fileId),
-          ),
-        );
-
-        return {
-          ...productRecord,
-          files: fileRecords.map(fileRecord => fileRecord?.url),
-        };
-      }),
-    ),
+    data: {
+      list,
+    },
   };
 });

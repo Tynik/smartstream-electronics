@@ -30,8 +30,33 @@ export const getNetlifyStoreRecords = async <T>(
   listOptions: Omit<ListOptions, 'paginate'> = {},
   { offset = 0, limit = 1000 }: GetNetlifyStoreRecordsOptions = {},
 ): Promise<T[]> => {
-  const listResult = await store.list(listOptions);
-  const keys = listResult.blobs.slice(offset, offset + limit).map(blob => blob.key);
+  const listResult = store.list({ paginate: true, ...listOptions });
+
+  const keys: string[] = [];
+  let itemsCollected = 0; // Track the number of items collected across pages
+  let skippedItems = 0; // Track the number of items skipped to handle offset
+
+  for await (const entry of listResult) {
+    const remainingOffset = Math.max(0, offset - skippedItems);
+    const availableItems = entry.blobs.length - remainingOffset;
+
+    if (availableItems <= 0) {
+      skippedItems += entry.blobs.length; // Keep counting items for offset
+    } else {
+      const blobsToCollect = entry.blobs.slice(
+        remainingOffset,
+        remainingOffset + (limit - itemsCollected),
+      );
+      keys.push(...blobsToCollect.map(blob => blob.key));
+
+      itemsCollected += blobsToCollect.length;
+      skippedItems += entry.blobs.length;
+
+      if (itemsCollected >= limit) {
+        break;
+      }
+    }
+  }
 
   return getNetlifyStoreRecordsByKeys<T>(store, keys);
 };

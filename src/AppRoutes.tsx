@@ -4,10 +4,10 @@ import React from 'react';
 import { PROFILE_ROUTE_PATH, SIGN_IN_ROUTE_PATH, SIGN_UP_ROUTE_PATH } from '~/constants';
 import {
   AddProductPage,
-  CategoriesPage,
+  ManageCategoriesPage,
   EmailConfirmationPage,
-  FeaturesPage,
-  ProductsPage,
+  ManageFeaturesPage,
+  ManageProductsPage,
   ProfilePage,
   SignInPage,
   SignUpPage,
@@ -16,23 +16,23 @@ import { useCurrentApp } from '~/providers';
 import { Loading } from '~/components';
 
 export const AppRoutes = () => {
-  const { accountProfile, isAccountProfileLoading } = useCurrentApp();
+  const { profile, isProfileLoading } = useCurrentApp();
 
-  if (isAccountProfileLoading) {
+  if (isProfileLoading) {
     return <Loading $margin="auto" />;
   }
 
   return (
     <Routes>
-      {accountProfile ? (
+      {profile ? (
         <>
           <Route path={PROFILE_ROUTE_PATH} element={<ProfilePage />} />
 
-          {accountProfile.role === 'admin' && (
+          {profile.role === 'admin' && (
             <Route path="/manage/*">
-              <Route path="categories" element={<CategoriesPage />} />
-              <Route path="products" element={<ProductsPage />} />
-              <Route path="features" element={<FeaturesPage />} />
+              <Route path="categories" element={<ManageCategoriesPage />} />
+              <Route path="products" element={<ManageProductsPage />} />
+              <Route path="features" element={<ManageFeaturesPage />} />
               <Route path="products/add" element={<AddProductPage />} />
             </Route>
           )}

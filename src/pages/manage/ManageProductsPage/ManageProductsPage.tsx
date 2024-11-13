@@ -7,7 +7,7 @@ import { MANAGE_ADD_PRODUCT_ROUTE_PATH } from '~/constants';
 import { getProducts } from '~/api';
 import { Button, Image, Loading, Panel, Text } from '~/components';
 
-export const ProductsPage = () => {
+export const ManageProductsPage = () => {
   const navigate = useNavigate();
 
   const { data: products, isInitialLoading: isProductsLoading } = useQuery({
@@ -25,7 +25,7 @@ export const ProductsPage = () => {
         Add Product
       </Button>
 
-      <HoneyList items={products} itemKey="id" $gap={2}>
+      <HoneyList items={products?.list} itemKey="id" $gap={2}>
         {product => (
           <HoneyBox
             $display="flex"
@@ -36,7 +36,7 @@ export const ProductsPage = () => {
             $borderColor="secondary.softGray"
           >
             <HoneyBox $width="120px" $height="120px">
-              <Image src={product.files[0]} />
+              {product.files.length > 0 && <Image src={product.files[0].url} draggable="false" />}
             </HoneyBox>
 
             <Text variant="subtitle1">{product.title}</Text>

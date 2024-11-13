@@ -96,7 +96,7 @@ export const cleanupStoreRecordConstraints = <StoreRecord extends NetlifyStoreRe
   const constraintsStore = getConstraintsStore();
 
   return Promise.all(
-    [...record.__constraints__].map(async (recordConstraint, recordConstraintIndex) => {
+    [...(record.__constraints__ ?? [])].map(async (recordConstraint, recordConstraintIndex) => {
       if (recordConstraint.type === 'unique') {
         await constraintsStore.delete(recordConstraint.key);
 

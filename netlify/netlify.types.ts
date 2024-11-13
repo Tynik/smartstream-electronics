@@ -165,6 +165,7 @@ export type ProductFileRecord = {
 
 export type ProductFeatureRecord = {
   id: ProductFeatureId;
+  categoryId: CategoryId;
   productId: ProductId;
   featureId: FeatureId;
   value: string;
@@ -183,7 +184,9 @@ export type OrderRecord = {
 
 export type OrderProductRecord = {
   id: string;
+  userId: UserId;
   orderId: OrderId;
+  categoryId: CategoryId;
   productId: ProductId;
   quantity: number;
   price: number;

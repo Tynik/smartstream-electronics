@@ -28,19 +28,19 @@ FeatureCategoryListItemStyled.defaultProps = {
   $alignItems: 'center',
 };
 
-type FeatureCategoryListItemProps = {
+type ManageFeatureCategoryListItemProps = {
   featureCategory: FeatureCategory;
   isSelected: boolean;
   onSelect: (featureCategory: Nullable<FeatureCategory>) => void;
   onEdit: (featureCategory: FeatureCategory) => void;
 };
 
-export const FeatureCategoryListItem = ({
+export const ManageFeatureCategoryListItem = ({
   featureCategory,
   isSelected,
   onSelect,
   onEdit,
-}: FeatureCategoryListItemProps) => {
+}: ManageFeatureCategoryListItemProps) => {
   return (
     <FeatureCategoryListItemStyled
       onClick={() => onSelect(isSelected ? null : featureCategory)}

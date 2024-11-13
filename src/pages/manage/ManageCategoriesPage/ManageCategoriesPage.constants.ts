@@ -1,6 +1,6 @@
 import type { HoneyFormFieldsConfig } from '@react-hive/honey-form';
 
-import type { CategoryFormData } from './CategoriesPage.types';
+import type { CategoryFormData } from './ManageCategoriesPage.types';
 
 export const CATEGORY_FORM_FIELDS: HoneyFormFieldsConfig<CategoryFormData> = {
   name: {

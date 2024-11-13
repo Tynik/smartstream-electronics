@@ -1,6 +1,8 @@
 import type { HTTPRequestMethod } from '~/types';
 
 export type NetlifyFunction =
+  | 'get-profile'
+  | 'update-profile'
   | 'add-category'
   | 'get-categories'
   | 'update-category'
@@ -19,7 +21,6 @@ export type NetlifyFunction =
   | 'sign-in'
   | 'sign-up'
   | 'verify-auth-token'
-  | 'get-account-profile'
   | 'confirm-email';
 
 export type NetlifyRequestResponse<Response = unknown> = {

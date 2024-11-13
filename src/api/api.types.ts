@@ -1,6 +1,12 @@
 import type Stripe from 'stripe';
 import type { Nullable } from '~/types';
 
+export type UserId = string;
+
+export type UserShippingAddressId = string;
+
+export type UserBillingAddressId = string;
+
 export type FileId = string;
 
 export type CategoryId = string;
@@ -20,12 +26,38 @@ export type PaginationPayload = {
   pageSize: number;
 };
 
-export type AccountProfile = {
+export type PaginatedList<Record> = {
+  list: Record[];
+};
+
+export type UserShippingAddress = {
+  id: UserShippingAddressId;
+  userId: UserId;
+  line1: string;
+  line2: Nullable<string>;
+  city: string;
+  postcode: string;
+  note: Nullable<string>;
+};
+
+export type UserBillingAddress = {
+  id: UserBillingAddressId;
+  userId: UserId;
+  line1: string;
+  line2: Nullable<string>;
+  city: string;
+  postcode: string;
+};
+
+export type Profile = {
+  id: UserId;
   firstName: string;
   lastName: string;
   email: string;
   phone: Nullable<string>;
   role: UserRole;
+  shippingAddresses: UserShippingAddress[];
+  billingAddresses: UserBillingAddress[];
 };
 
 export type Category = {
@@ -47,6 +79,14 @@ export type Feature = {
   name: string;
 };
 
+export type FileRecord = {
+  id: FileId;
+  name: string;
+  type: string;
+  path: string;
+  url: string;
+};
+
 export type Product = {
   id: ProductId;
   categoryId: CategoryId;
@@ -55,5 +95,5 @@ export type Product = {
   subtitle: Nullable<string>;
   content: string;
   totalQuantity: number;
-  files: string[];
+  files: FileRecord[];
 };

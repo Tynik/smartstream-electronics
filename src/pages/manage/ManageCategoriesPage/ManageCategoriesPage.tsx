@@ -8,7 +8,7 @@ import { CategoryListItem } from './components';
 import { AddCategoryDialog } from './dialogs';
 import { useCategories } from '~/hooks';
 
-export const CategoriesPage = () => {
+export const ManageCategoriesPage = () => {
   const [isAddCategory, setIsAddCategory] = useState(false);
   const [editCategory, setEditCategory] = useState<Nullable<FeatureCategory>>(null);
 
@@ -35,11 +35,7 @@ export const CategoriesPage = () => {
       <AddCategoryDialog
         isOpen={isAddCategory}
         onClose={() => setIsAddCategory(false)}
-        onSuccess={() => {
-          setIsAddCategory(false);
-
-          return refetchCategories();
-        }}
+        onSuccess={refetchCategories}
       />
     </Panel>
   );

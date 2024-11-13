@@ -1,3 +1,4 @@
+import type { ImgHTMLAttributes } from 'react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -10,11 +11,11 @@ const ImageStyled = styled.img`
   object-fit: contain;
 `;
 
-type ImageProps = {
+type ImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
   src: File | string;
 };
 
-export const Image = ({ src }: ImageProps) => {
+export const Image = ({ src, ...props }: ImageProps) => {
   const objectUrl = useObjectUrl(typeof src === 'string' ? undefined : src);
 
   const imgSrc = typeof src === 'string' ? src : objectUrl;
@@ -23,5 +24,5 @@ export const Image = ({ src }: ImageProps) => {
     return null;
   }
 
-  return <ImageStyled src={imgSrc} alt="" />;
+  return <ImageStyled src={imgSrc} alt="" {...props} />;
 };

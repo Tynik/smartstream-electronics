@@ -3,12 +3,12 @@ import { createToken, hashPassword } from '../netlify-crypto.helpers';
 import { AUTH_TOKEN_EXPIRATION, IS_LOCAL_ENV } from '../netlify.constants';
 import { netlifyStores } from '../netlify-store';
 
-type LoginPayload = {
+type SignInPayload = {
   email: string;
   password: string;
 };
 
-export const handler = createHandler<LoginPayload>(
+export const handler = createHandler<SignInPayload>(
   { allowMethods: ['POST'] },
   async ({ payload }) => {
     if (!payload) {

@@ -13,3 +13,4 @@ export * from './Dialog';
 export * from './Image';
 export * from './SelectFilesWrapper';
 export * from './Select';
+export * from './Editor';

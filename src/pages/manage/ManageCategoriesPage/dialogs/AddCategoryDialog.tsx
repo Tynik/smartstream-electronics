@@ -5,8 +5,8 @@ import { HoneyBox, HoneyFlexBox } from '@react-hive/honey-layout';
 import { toast } from 'react-toastify';
 
 import type { DialogProps } from '~/components';
-import type { CategoryFormData } from '../CategoriesPage.types';
-import { CATEGORY_FORM_FIELDS } from '../CategoriesPage.constants';
+import type { CategoryFormData } from '../ManageCategoriesPage.types';
+import { CATEGORY_FORM_FIELDS } from '../ManageCategoriesPage.constants';
 import { Text, Button, Dialog, TextInput } from '~/components';
 import { addCategory, handlerApiError } from '~/api';
 
@@ -15,6 +15,8 @@ type AddCategoryDialogProps = Omit<DialogProps, 'children' | 'title'> & {
 };
 
 export const AddCategoryDialog = ({ onSuccess, ...props }: AddCategoryDialogProps) => {
+  const { onClose } = props;
+
   const handleAddCategory: HoneyFormOnSubmit<CategoryFormData> = async data => {
     try {
       await addCategory({
@@ -27,6 +29,7 @@ export const AddCategoryDialog = ({ onSuccess, ...props }: AddCategoryDialogProp
         type: 'success',
       });
 
+      onClose();
       await onSuccess();
     } catch (e) {
       handlerApiError(e);

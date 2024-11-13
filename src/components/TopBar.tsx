@@ -3,7 +3,7 @@ import { HoneyBox } from '@react-hive/honey-layout';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { ACCOUNT_PROFILE_QUERY_KEY, PROFILE_ROUTE_PATH, SIGN_IN_ROUTE_PATH } from '~/constants';
+import { PROFILE_QUERY_KEY, PROFILE_ROUTE_PATH, SIGN_IN_ROUTE_PATH } from '~/constants';
 import { LogoutIcon, MenuIcon, PersonIcon } from '~/icons';
 import { useCurrentApp } from '~/providers';
 
@@ -13,16 +13,16 @@ export const TopBar = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { accountProfile, toggleMenu } = useCurrentApp();
+  const { profile, toggleMenu } = useCurrentApp();
 
   const handleManageProfile = () => {
-    navigate(accountProfile ? PROFILE_ROUTE_PATH : SIGN_IN_ROUTE_PATH);
+    navigate(profile ? PROFILE_ROUTE_PATH : SIGN_IN_ROUTE_PATH);
   };
 
   const handleLogout = async () => {
     document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
 
-    await queryClient.resetQueries({ queryKey: ACCOUNT_PROFILE_QUERY_KEY });
+    await queryClient.resetQueries({ queryKey: PROFILE_QUERY_KEY });
 
     navigate(SIGN_IN_ROUTE_PATH);
   };
@@ -46,7 +46,7 @@ export const TopBar = () => {
           <PersonIcon $color="white" />
         </IconButton>
 
-        {accountProfile && (
+        {profile && (
           <IconButton onClick={handleLogout}>
             <LogoutIcon $color="white" />
           </IconButton>

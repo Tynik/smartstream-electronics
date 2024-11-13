@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { flip, shift, useFloating } from '@floating-ui/react-dom';
 import { HoneyBox, HoneyList } from '@react-hive/honey-layout';
@@ -5,6 +6,7 @@ import { noop } from '@react-hive/honey-form';
 import styled, { css } from 'styled-components';
 
 import { TextInput } from '~/components';
+import { SelectStyled } from './Select.styled';
 
 const SelectOptionStyled = styled(HoneyBox)`
   ${({ theme: { colors } }) => css`
@@ -25,18 +27,18 @@ type SelectOption = object;
 export type SelectProps<Option extends SelectOption> = {
   value: Option | undefined;
   options: Option[] | undefined;
-  idKey?: keyof Option;
   valueKey?: keyof Option;
   label: string;
+  error?: ReactNode;
   onChange: (option: Option) => void;
 };
 
 export const Select = <Option extends SelectOption>({
   value,
   options,
-  idKey = 'id' as keyof Option,
   valueKey = 'name' as keyof Option,
   label,
+  error,
   onChange,
 }: SelectProps<Option>) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,14 +55,18 @@ export const Select = <Option extends SelectOption>({
   };
 
   return (
-    <HoneyBox ref={refs.setReference} $position="relative" $width="100%">
+    <SelectStyled ref={refs.setReference}>
       <TextInput
         value={(value?.[valueKey] as string) ?? ''}
         label={label}
         onClick={() => setIsOpen(!isOpen)}
         onChange={noop}
         placeholder="Select option"
+        // ARIA
+        aria-invalid={Boolean(error)}
       />
+
+      {error && <p className="text-input__error">{error}</p>}
 
       {isOpen && (
         <HoneyList
@@ -84,6 +90,6 @@ export const Select = <Option extends SelectOption>({
           )}
         </HoneyList>
       )}
-    </HoneyBox>
+    </SelectStyled>
   );
 };

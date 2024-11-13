@@ -105,7 +105,7 @@ type MenuItem = {
 export const Menu = () => {
   const { screenState } = useHoneyLayout();
 
-  const { accountProfile, isOpenMenu, toggleMenu } = useCurrentApp();
+  const { profile, isOpenMenu, toggleMenu } = useCurrentApp();
 
   const handleOnClickMenuItem = () => {
     if (screenState.isXs || screenState.isSm) {
@@ -119,22 +119,22 @@ export const Menu = () => {
         id: 'manage-categories',
         title: 'Categories',
         to: MANAGE_CATEGORIES_ROUTE_PATH,
-        isVisible: accountProfile?.role === 'admin',
+        isVisible: profile?.role === 'admin',
       },
       {
         id: 'manage-products',
         title: 'Products',
         to: MANAGE_PRODUCTS_ROUTE_PATH,
-        isVisible: accountProfile?.role === 'admin',
+        isVisible: profile?.role === 'admin',
       },
       {
         id: 'manage-features',
         title: 'Features',
         to: MANAGE_FEATURES_ROUTE_PATH,
-        isVisible: accountProfile?.role === 'admin',
+        isVisible: profile?.role === 'admin',
       },
     ],
-    [accountProfile],
+    [profile],
   );
 
   return (

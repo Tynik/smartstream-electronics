@@ -1,4 +1,4 @@
-export * from './CategoriesPage';
-export * from './FeaturesPage';
-export * from './ProductsPage';
+export * from './ManageCategoriesPage';
+export * from './ManageFeaturesPage';
+export * from './ManageProductsPage';
 export * from './AddProductPage';

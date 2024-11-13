@@ -1,19 +1,19 @@
 import { createHandler } from '../netlify.helpers';
 import { withCredentials } from '../netlify-auth.helpers';
+import { netlifyStores } from '../netlify-store';
 
-type SignupPayload = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-};
-
-export const handler = createHandler<SignupPayload>(
+export const handler = createHandler(
   { allowMethods: ['GET'] },
   withCredentials(async ({ userRecord }) => {
+    const shippingAddresses = await netlifyStores.userShippingAddresses.getList();
+    const billingAddresses = await netlifyStores.userBillingAddresses.getList();
+
     return {
       status: 'ok',
       data: {
+        shippingAddresses,
+        billingAddresses,
+        id: userRecord.id,
         firstName: userRecord.firstName,
         lastName: userRecord.lastName,
         email: userRecord.email,

@@ -11,10 +11,14 @@ import type {
   ManufacturerRecord,
   MeasurementRecord,
   Nullable,
+  OrderProductRecord,
+  OrderRecord,
   ProductFeatureRecord,
   ProductFileRecord,
   ProductRecord,
+  UserBillingAddressRecord,
   UserRecord,
+  UserShippingAddressRecord,
 } from '../netlify.types';
 import { NetlifyStoreError } from './netlify-store-errors';
 import { getNetlifyStore, getNetlifyStoreRecords } from './netlify-store.helpers';
@@ -108,17 +112,14 @@ type NetlifyStoresConfig<StoresDefinition extends NetlifyStoresDefinition> = {
 };
 
 type NetlifyStoreApi<StoreRecord extends NetlifyStoreRecord> = {
-  get: (key: string) => Promise<Nullable<NetlifyStoreEnhancedRecord<StoreRecord>>>;
-  create: (key: string, record: StoreRecord) => Promise<NetlifyStoreEnhancedRecord<StoreRecord>>;
-  update: (
-    key: string,
-    record: Partial<StoreRecord>,
-  ) => Promise<NetlifyStoreEnhancedRecord<StoreRecord>>;
+  get: (key: string) => Promise<Nullable<StoreRecord>>;
+  create: (key: string, record: StoreRecord) => Promise<StoreRecord>;
+  update: (key: string, record: Partial<StoreRecord>) => Promise<StoreRecord>;
   delete: (key: string) => Promise<void>;
   getList: (
     listOptions?: Omit<ListOptions, 'paginate'>,
     options?: GetNetlifyStoreRecordsOptions,
-  ) => Promise<NetlifyStoreEnhancedRecord<StoreRecord>[]>;
+  ) => Promise<StoreRecord[]>;
 };
 
 type NetlifyStoresApi<StoresDefinition extends NetlifyStoresDefinition> = {
@@ -178,9 +179,18 @@ const createStoreApi = <
   };
 
   const get = async (key: string) => {
-    return (await store.get(key, {
+    const record = (await store.get(key, {
       type: 'json',
     })) as Nullable<NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>>;
+
+    if (record) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { __constraints__, ...otherFields } = record;
+
+      return otherFields as StoresDefinition[StoreName];
+    }
+
+    return null;
   };
 
   const create = async (key: string, record: StoresDefinition[StoreName]) => {
@@ -188,7 +198,10 @@ const createStoreApi = <
 
     await store.setJSON(key, enhancedRecord);
 
-    return enhancedRecord;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { __constraints__, ...otherFields } = enhancedRecord;
+
+    return otherFields as StoresDefinition[StoreName];
   };
 
   const update = async (key: string, record: Partial<StoresDefinition[StoreName]>) => {
@@ -214,12 +227,18 @@ const createStoreApi = <
       ...previousRecord,
       ...enhancedRecord,
       // Merge constraints
-      __constraints__: [...previousRecord.__constraints__, ...enhancedRecord.__constraints__],
+      __constraints__: [
+        ...(previousRecord.__constraints__ ?? []),
+        ...enhancedRecord.__constraints__,
+      ],
     };
 
     await store.setJSON(key, nextRecord);
 
-    return nextRecord;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { __constraints__, ...otherFields } = nextRecord;
+
+    return otherFields as StoresDefinition[StoreName];
   };
 
   const deleteRecord = async (key: string) => {
@@ -242,15 +261,21 @@ const createStoreApi = <
     await storeConfig.onAfterDelete?.(record);
   };
 
-  const getList = (
+  const getList = async (
     listOptions?: Omit<ListOptions, 'paginate'>,
     options?: GetNetlifyStoreRecordsOptions,
-  ) =>
-    getNetlifyStoreRecords<NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>>(
-      store,
-      listOptions,
-      options,
-    );
+  ) => {
+    const records = await getNetlifyStoreRecords<
+      NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>
+    >(store, listOptions, options);
+
+    return records.map(record => {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { __constraints__, ...otherFields } = record;
+
+      return otherFields as StoresDefinition[StoreName];
+    });
+  };
 
   return {
     get,
@@ -278,6 +303,8 @@ export const defineNetlifyStores = <StoresDefinition extends NetlifyStoresDefini
 
 type NetlifyStores = {
   users: UserRecord;
+  userShippingAddresses: UserShippingAddressRecord;
+  userBillingAddresses: UserBillingAddressRecord;
   files: FileRecord;
   measurements: MeasurementRecord;
   manufacturers: ManufacturerRecord;
@@ -289,6 +316,8 @@ type NetlifyStores = {
   products: ProductRecord;
   productFiles: ProductFileRecord;
   productFeatures: ProductFeatureRecord;
+  orders: OrderRecord;
+  orderProducts: OrderProductRecord;
 };
 
 initFirebaseApp();
@@ -296,6 +325,24 @@ initFirebaseApp();
 export const netlifyStores = defineNetlifyStores<NetlifyStores>({
   users: {
     //
+  },
+  userShippingAddresses: {
+    constraints: [
+      {
+        type: 'foreignKey',
+        field: 'userId',
+        store: 'users',
+      },
+    ],
+  },
+  userBillingAddresses: {
+    constraints: [
+      {
+        type: 'foreignKey',
+        field: 'userId',
+        store: 'users',
+      },
+    ],
   },
   files: {
     onAfterDelete: async fileRecord => {
@@ -377,6 +424,11 @@ export const netlifyStores = defineNetlifyStores<NetlifyStores>({
     constraints: [
       {
         type: 'foreignKey',
+        field: 'categoryId',
+        store: 'categories',
+      },
+      {
+        type: 'foreignKey',
         field: ['categoryId', 'productId'],
         store: 'products',
       },
@@ -391,13 +443,36 @@ export const netlifyStores = defineNetlifyStores<NetlifyStores>({
     constraints: [
       {
         type: 'foreignKey',
-        field: 'productId',
+        field: ['categoryId', 'productId'],
         store: 'products',
       },
       {
         type: 'foreignKey',
         field: 'featureId',
         store: 'features',
+      },
+    ],
+  },
+  orders: {
+    constraints: [
+      {
+        type: 'foreignKey',
+        field: 'userId',
+        store: 'users',
+      },
+    ],
+  },
+  orderProducts: {
+    constraints: [
+      {
+        type: 'foreignKey',
+        field: ['userId', 'orderId'],
+        store: 'orders',
+      },
+      {
+        type: 'foreignKey',
+        field: ['categoryId', 'productId'],
+        store: 'products',
       },
     ],
   },

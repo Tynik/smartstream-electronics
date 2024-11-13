@@ -1,6 +1,6 @@
 import type { Nullable } from '~/types';
 import type {
-  AccountProfile,
+  Profile,
   Feature,
   FeatureCategory,
   FeatureCategoryId,
@@ -10,11 +10,26 @@ import type {
   StripeProductId,
   FileId,
   Category,
+  CategoryId,
+  PaginatedList,
 } from './api.types';
 import { netlifyRequest } from './netlify-request';
 
-export const getAccountProfile = async () =>
-  (await netlifyRequest<AccountProfile>('get-account-profile')).data;
+export const getProfile = async () => (await netlifyRequest<Profile>('get-profile')).data;
+
+type UpdateProfilePayload = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+};
+
+export const updateProfile = async (payload: UpdateProfilePayload) =>
+  (
+    await netlifyRequest('update-profile', {
+      payload,
+      method: 'PATCH',
+    })
+  ).data;
 
 type AddCategoryPayload = {
   name: string;
@@ -59,6 +74,17 @@ export const updateFeatureCategory = async (payload: UpdateFeatureCategoryPayloa
 
 export const getFeatureCategories = async () =>
   (await netlifyRequest<FeatureCategory[]>('get-feature-categories')).data;
+
+export const deleteCategory = async (categoryId: CategoryId) => {
+  return (
+    await netlifyRequest('delete-category', {
+      params: {
+        categoryId,
+      },
+      method: 'DELETE',
+    })
+  ).data;
+};
 
 export const getFeatures = async (categoryId: FeatureCategoryId) =>
   (
@@ -109,7 +135,7 @@ export const uploadFile = async (file: File, type: FileType) => {
 
 export const deleteFile = async (fileId: FileId) => {
   return (
-    await netlifyRequest<UploadedFile>('delete-file', {
+    await netlifyRequest('delete-file', {
       params: {
         fileId,
       },
@@ -143,7 +169,7 @@ export const addProduct = async (payload: AddProductPayload) =>
 
 export const getProducts = async (payload: PaginationPayload) =>
   (
-    await netlifyRequest<Product[]>('get-products', {
+    await netlifyRequest<PaginatedList<Product>>('get-products', {
       params: payload,
     })
   ).data;

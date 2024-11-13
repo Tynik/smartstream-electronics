@@ -3,16 +3,17 @@ import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
-import type { AccountProfile, NetlifyRequestResponse } from '~/api';
-import { ACCOUNT_PROFILE_QUERY_KEY, SIGN_IN_ROUTE_PATH } from '~/constants';
-import { getAccountProfile, netlifyRequest } from '~/api';
+import type { Profile, NetlifyRequestResponse } from '~/api';
+import { PROFILE_QUERY_KEY, SIGN_IN_ROUTE_PATH } from '~/constants';
+import { getProfile, netlifyRequest } from '~/api';
 import { getCookieValue } from '~/helpers';
 
 type AppContextValue = {
   isOpenMenu: boolean;
   toggleMenu: () => void;
-  accountProfile: AccountProfile | undefined;
-  isAccountProfileLoading: boolean;
+  profile: Profile | undefined;
+  refetchProfile: () => Promise<void>;
+  isProfileLoading: boolean;
 };
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -50,9 +51,14 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     enabled: Boolean(authToken),
   });
 
-  const { data: accountProfile, isInitialLoading: isAccountProfileLoading } = useQuery({
-    queryKey: ACCOUNT_PROFILE_QUERY_KEY,
-    queryFn: getAccountProfile,
+  const {
+    data: profile,
+    isInitialLoading: isProfileLoading,
+    isError: isProfileError,
+    refetch: refetchProfile,
+  } = useQuery({
+    queryKey: PROFILE_QUERY_KEY,
+    queryFn: getProfile,
     enabled: Boolean(authToken),
   });
 
@@ -60,10 +66,13 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     () => ({
       isOpenMenu,
       toggleMenu: () => setIsOpenMenu(!isOpenMenu),
-      accountProfile,
-      isAccountProfileLoading,
+      profile,
+      refetchProfile: async () => {
+        await refetchProfile();
+      },
+      isProfileLoading,
     }),
-    [isOpenMenu, accountProfile, isAccountProfileLoading],
+    [isOpenMenu, profile, refetchProfile, isProfileLoading],
   );
 
   return <AppContext.Provider value={contextValue}>{children(contextValue)}</AppContext.Provider>;
