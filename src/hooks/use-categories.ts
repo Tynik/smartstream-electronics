@@ -5,7 +5,7 @@ import { getCategories } from '~/api';
 export const useCategories = () => {
   const {
     data: categories,
-    isInitialLoading: isCategoriesLoading,
+    isFetching: isCategoriesLoading,
     isError: isCategoriesError,
     refetch: refetchCategories,
   } = useQuery({

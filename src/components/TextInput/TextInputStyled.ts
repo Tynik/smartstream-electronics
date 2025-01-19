@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components';
-import { resolveFont } from '@react-hive/honey-layout';
+import { HoneyBox, resolveFont } from '@react-hive/honey-layout';
 
-export const TextInputStyled = styled.div`
+export const TextInputStyled = styled(HoneyBox)`
   ${({ theme: { colors } }) => css`
     display: flex;
     flex-direction: column;

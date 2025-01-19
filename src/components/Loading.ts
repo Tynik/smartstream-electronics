@@ -1,6 +1,7 @@
-import styled, { css, keyframes } from 'styled-components';
-import type { HoneyBoxProps } from '@react-hive/honey-layout';
+import type { HTMLAttributes } from 'react';
+import type { HoneyCSSDimensionValue, HoneyBoxProps } from '@react-hive/honey-layout';
 import { HoneyBox } from '@react-hive/honey-layout';
+import styled, { css, keyframes } from 'styled-components';
 
 const spin = keyframes`
   0% {
@@ -11,19 +12,21 @@ const spin = keyframes`
   }
 `;
 
-type LoadingProps = HoneyBoxProps & {
-  size?: string;
-  color?: string;
-};
+type LoadingProps = HTMLAttributes<HTMLDivElement> &
+  HoneyBoxProps & {
+    size?: HoneyCSSDimensionValue;
+    lineWidth?: HoneyCSSDimensionValue;
+    color?: string;
+  };
 
 export const Loading = styled(HoneyBox)<LoadingProps>`
-  ${({ size = '40px', theme: { colors } }) => css`
+  ${({ size = '40px', lineWidth = '4px', theme: { colors } }) => css`
     display: inline-block;
 
     width: ${size};
     height: ${size};
 
-    border: 4px solid ${colors.primary.dodgerBlue};
+    border: ${lineWidth} solid ${colors.primary.dodgerBlue};
     border-top-color: transparent;
     border-radius: 50%;
 

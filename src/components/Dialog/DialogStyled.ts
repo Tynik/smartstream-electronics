@@ -1,24 +1,21 @@
 import styled, { css } from 'styled-components';
-import { resolveColor, resolveFont, resolveSpacing } from '@react-hive/honey-layout';
-
-export const DIALOG_TRANSITION_DURATION_MS = 250;
+import {
+  HoneyOverlay,
+  honeyVisibilityTransitionEffect,
+  resolveColor,
+  resolveFont,
+  resolveSpacing,
+} from '@react-hive/honey-layout';
 
 const TOP_PERCENTAGE = '25%';
 
-export type DialogStyledProps = {
-  isOpen: boolean;
-};
+export const DialogStyled = styled(HoneyOverlay)`
+  ${({ theme: { colors } }) => css`
+    ${honeyVisibilityTransitionEffect({
+      durationMs: 250,
+    })};
 
-export const DialogStyled = styled.div<DialogStyledProps>`
-  ${({ isOpen, theme: { colors } }) => css`
     position: absolute;
-
-    opacity: ${isOpen ? 1 : 0};
-    visibility: ${isOpen ? 'visible' : 'hidden'};
-
-    transition-property: opacity, visibility;
-    transition-duration: ${DIALOG_TRANSITION_DURATION_MS}ms;
-    transition-timing-function: ease-in-out;
 
     left: 0;
     top: 0;

@@ -3,19 +3,16 @@ import type { HTMLAttributes } from 'react';
 import type { HoneyBoxProps, HoneyFonts } from '@react-hive/honey-layout';
 import { resolveFont, HoneyBox } from '@react-hive/honey-layout';
 
-type ButtonProps = HTMLAttributes<HTMLDivElement> &
+export type TextProps = HTMLAttributes<HTMLDivElement> &
   HoneyBoxProps & {
     variant: keyof HoneyFonts;
   };
 
-export const Text = styled(HoneyBox).attrs<ButtonProps>(({ as }) => ({
+export const Text = styled(HoneyBox).attrs<TextProps>(({ as, $color }) => ({
   as: as ?? 'p',
-}))<ButtonProps>`
+  $color: $color ?? 'neutral.darkGray',
+}))<TextProps>`
   ${({ variant }) => css`
-    ${resolveFont(variant)}
+    ${resolveFont(variant)};
   `}
 `;
-
-Text.defaultProps = {
-  $color: 'neutral.darkGray',
-};

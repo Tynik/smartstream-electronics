@@ -13,7 +13,7 @@ import { useOnChange } from './use-on-change';
  *   without interfering with ongoing use of the URL.
  * - When the component unmounts, the current object URL is also revoked to prevent memory leaks.
  *
- * @param {Blob | MediaSource | undefined} obj - The `Blob` or `MediaSource` for which to create an object URL.
+ * @param {Nullable<Blob | MediaSource | undefined>} obj - The `Blob` or `MediaSource` for which to create an object URL.
  *
  * @returns {Nullable<string>} - The created object URL, or `null` if no object is provided or disabled.
  *
@@ -26,7 +26,7 @@ import { useOnChange } from './use-on-change';
  * };
  * ```
  */
-export const useObjectUrl = (obj: Blob | MediaSource | undefined): Nullable<string> => {
+export const useObjectUrl = (obj: Nullable<Blob | MediaSource> | undefined): Nullable<string> => {
   const [objectUrl, setObjectUrl] = useState<Nullable<string>>(() =>
     obj ? URL.createObjectURL(obj) : null,
   );
@@ -54,6 +54,7 @@ export const useObjectUrl = (obj: Blob | MediaSource | undefined): Nullable<stri
   useEffect(() => {
     // Revoke the object URL on part unmount
     return () => {
+      setObjectUrl(null);
       revokeUrl(objectUrlRef.current);
     };
   }, []);

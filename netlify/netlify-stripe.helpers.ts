@@ -7,7 +7,7 @@ export const initStripeClient = (): Stripe => {
   assert(STRIPE_API_KEY, 'The `STRIPE_API_KEY` must be set as environment variable');
 
   return new Stripe(STRIPE_API_KEY, {
-    apiVersion: '2024-10-28.acacia',
+    apiVersion: '2024-12-18.acacia',
   });
 };
 

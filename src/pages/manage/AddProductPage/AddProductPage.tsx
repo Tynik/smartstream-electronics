@@ -79,7 +79,12 @@ export const AddProductPage = () => {
       <HoneyForm fields={ADD_PRODUCT_FORM_FIELDS} onSubmit={handleAddProduct}>
         {({ formFields, formValues, isFormSubmitAllowed }) => (
           <HoneyFlexBox $gap={2} $width="100%" $maxWidth="600px" $margin="0 auto">
-            <SelectFilesWrapper onSelectFiles={formFields.images.setValue}>
+            <SelectFilesWrapper
+              onSelectFiles={formFields.images.setValue}
+              inputProps={{
+                accept: 'image/*',
+              }}
+            >
               <Button as="div">Select Images</Button>
             </SelectFilesWrapper>
 

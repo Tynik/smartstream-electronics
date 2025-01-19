@@ -3,7 +3,7 @@ import { HoneyList } from '@react-hive/honey-layout';
 
 import type { Nullable } from '~/types';
 import type { FeatureCategory } from '~/api';
-import { Button, Panel } from '~/components';
+import { Button, Loading, Panel } from '~/components';
 import { CategoryListItem } from './components';
 import { AddCategoryDialog } from './dialogs';
 import { useCategories } from '~/hooks';
@@ -25,9 +25,10 @@ export const ManageCategoriesPage = () => {
         isLoading={isCategoriesLoading}
         isError={isCategoriesError}
         itemKey="id"
-        $gap={1}
-        loadingContent="Loading..."
+        loadingContent={<Loading $margin="auto" />}
         noContent="No categories"
+        $gap={1}
+        $minHeight="250px"
       >
         {category => <CategoryListItem category={category} onEdit={setEditCategory} />}
       </HoneyList>

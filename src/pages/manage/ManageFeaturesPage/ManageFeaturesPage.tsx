@@ -25,7 +25,7 @@ export const ManageFeaturesPage = () => {
 
   const {
     data: featureCategories,
-    isInitialLoading: isFeatureCategoriesLoading,
+    isFetching: isFeatureCategoriesLoading,
     isError: isFeatureCategoriesError,
     refetch: refetchFeatureCategories,
   } = useQuery({
@@ -35,7 +35,7 @@ export const ManageFeaturesPage = () => {
 
   const {
     data: features,
-    isInitialLoading: isFeaturesLoading,
+    isFetching: isFeaturesLoading,
     isError: isFeaturesError,
     refetch: refetchFeatures,
   } = useQuery({
@@ -50,7 +50,7 @@ export const ManageFeaturesPage = () => {
 
   return (
     <Panel title="Features">
-      <HoneyGrid columns={2} spacing={2}>
+      <HoneyGrid columns={2} spacing={2} minColumnHeight="250px">
         <HoneyGridColumn
           $gap={2}
           $padding={1}
@@ -68,7 +68,8 @@ export const ManageFeaturesPage = () => {
             isError={isFeatureCategoriesError}
             itemKey="id"
             $gap={1}
-            loadingContent="Loading..."
+            $flexGrow={1}
+            loadingContent={<Loading $margin="auto" />}
             noContent="No feature categories"
           >
             {featureCategory => (
@@ -104,7 +105,8 @@ export const ManageFeaturesPage = () => {
               isError={isFeaturesError}
               itemKey="id"
               $gap={1}
-              loadingContent="Loading..."
+              $flexGrow={1}
+              loadingContent={<Loading $margin="auto" />}
               noContent="No features for selected category"
             >
               {feature => <ManageFeatureListItem feature={feature} onEdit={() => {}} />}

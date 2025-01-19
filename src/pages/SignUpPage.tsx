@@ -98,14 +98,18 @@ export const SignUpPage = () => {
                 label="* Password"
                 error={formFields.password.errors[0]?.message}
                 {...formFields.password.props}
-                type="password"
+                inputProps={{
+                  type: 'password',
+                }}
               />
 
               <TextInput
                 label="* Repeat Password"
                 error={formFields.repeatPassword.errors[0]?.message}
                 {...formFields.repeatPassword.props}
-                type="password"
+                inputProps={{
+                  type: 'password',
+                }}
               />
 
               <HoneyBox $display="flex" $gap={2} $alignItems="center">

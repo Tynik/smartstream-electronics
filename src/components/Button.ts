@@ -1,11 +1,7 @@
-import styled, { css } from 'styled-components';
 import type { ButtonHTMLAttributes } from 'react';
-import {
-  HoneyBoxProps,
-  HoneyCSSDimensionValue,
-  resolveSpacing,
-  HoneyBox,
-} from '@react-hive/honey-layout';
+import type { HoneyBoxProps, HoneyCSSDimensionValue } from '@react-hive/honey-layout';
+import { HoneyBox } from '@react-hive/honey-layout';
+import styled, { css } from 'styled-components';
 
 type ButtonSize = 'small' | 'medium' | 'large';
 

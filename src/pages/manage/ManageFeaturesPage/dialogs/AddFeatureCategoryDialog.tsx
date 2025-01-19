@@ -31,6 +31,7 @@ export const AddFeatureCategoryDialog = ({
       });
 
       onClose();
+
       await onSuccess();
     } catch (e) {
       handlerApiError(e);

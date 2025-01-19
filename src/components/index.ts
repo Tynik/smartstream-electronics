@@ -12,5 +12,6 @@ export * from './Loading';
 export * from './Dialog';
 export * from './Image';
 export * from './SelectFilesWrapper';
+export * from './Popup';
 export * from './Select';
 export * from './Editor';

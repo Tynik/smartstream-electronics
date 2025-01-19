@@ -11,6 +11,9 @@ export const Editor = ({ value, onChange }: EditorProps) => {
   return (
     <CKEditor
       editor={ClassicEditor}
+      config={{
+        licenseKey: 'GPL',
+      }}
       data={value || ''}
       onChange={(event, editor) => {
         onChange(editor.getData());
