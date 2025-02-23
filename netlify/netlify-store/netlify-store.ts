@@ -1,25 +1,6 @@
 import type { ListOptions } from '@netlify/blobs';
-import { getStorage } from 'firebase-admin/storage';
 import type { GetNetlifyStoreRecordsOptions } from './netlify-store.helpers';
-import type {
-  ApplicationRecord,
-  CategoryRecord,
-  DatasheetRecord,
-  FeatureCategoryRecord,
-  FeatureRecord,
-  FileRecord,
-  ManufacturerRecord,
-  MeasurementRecord,
-  Nullable,
-  OrderProductRecord,
-  OrderRecord,
-  ProductFeatureRecord,
-  ProductFileRecord,
-  ProductRecord,
-  UserBillingAddressRecord,
-  UserRecord,
-  UserShippingAddressRecord,
-} from '../netlify.types';
+import type { DashCase, Nullable, NullableStringKeys } from '../netlify.types';
 import { NetlifyStoreError } from './netlify-store-errors';
 import { getNetlifyStore, getNetlifyStoreRecords } from './netlify-store.helpers';
 import { camelToDashCase } from '../netlify.utils';
@@ -27,16 +8,6 @@ import {
   cleanupStoreRecordConstraints,
   NETLIFY_STORE_CONSTRAINTS_PROCESSORS_MAP,
 } from './netlify-store-constraints';
-import { initFirebaseApp } from '../netlify-firebase.helpers';
-import { FIREBASE_BUCKET_NAME } from '../netlify.constants';
-
-type NullableStringKeys<T> = {
-  [K in keyof T]: T[K] extends Nullable<string> ? K : never;
-}[keyof T];
-
-export type DashCase<T extends string> = T extends `${infer First}-${infer Rest}`
-  ? `${Lowercase<First>}-${DashCase<Rest>}`
-  : Lowercase<T>;
 
 export type NetlifyStoreName = string;
 
@@ -100,9 +71,7 @@ type NetlifyStoreConfig<
   StoreName extends keyof StoresDefinition,
 > = {
   constraints?: NetlifyStoreConfigConstraint<StoresDefinition, StoreName>[];
-  onAfterDelete?: (
-    record: NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>,
-  ) => Promise<void>;
+  onAfterDelete?: (record: StoresDefinition[StoreName]) => Promise<void>;
 };
 
 export type NetlifyStoresDefinition = Record<NetlifyStoreName, NetlifyStoreRecord>;
@@ -111,15 +80,15 @@ type NetlifyStoresConfig<StoresDefinition extends NetlifyStoresDefinition> = {
   [StoreName in keyof StoresDefinition]: NetlifyStoreConfig<StoresDefinition, StoreName>;
 };
 
-type NetlifyStoreApi<StoreRecord extends NetlifyStoreRecord> = {
-  get: (key: string) => Promise<Nullable<StoreRecord>>;
-  create: (key: string, record: StoreRecord) => Promise<StoreRecord>;
-  update: (key: string, record: Partial<StoreRecord>) => Promise<StoreRecord>;
+type NetlifyStoreApi<Record extends NetlifyStoreRecord> = {
+  get: (key: string) => Promise<Nullable<Record>>;
+  create: (key: string, record: Record) => Promise<Record>;
+  update: (key: string, record: Partial<Record>) => Promise<Record>;
   delete: (key: string) => Promise<void>;
   getList: (
     listOptions?: Omit<ListOptions, 'paginate'>,
     options?: GetNetlifyStoreRecordsOptions,
-  ) => Promise<StoreRecord[]>;
+  ) => Promise<Record[]>;
 };
 
 type NetlifyStoresApi<StoresDefinition extends NetlifyStoresDefinition> = {
@@ -178,40 +147,46 @@ const createStoreApi = <
     return enhancedRecord;
   };
 
-  const get = async (key: string) => {
-    const record = (await store.get(key, {
+  const get = async <Record extends StoresDefinition[StoreName]>(key: string) => {
+    const enhancedRecord = (await store.get(key, {
       type: 'json',
-    })) as Nullable<NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>>;
+    })) as Nullable<NetlifyStoreEnhancedRecord<Record>>;
 
-    if (record) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { __constraints__, ...otherFields } = record;
+    if (enhancedRecord) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { __constraints__, ...record } = enhancedRecord;
 
-      return otherFields as StoresDefinition[StoreName];
+      return record as Record;
     }
 
     return null;
   };
 
-  const create = async (key: string, record: StoresDefinition[StoreName]) => {
+  const create = async <Record extends StoresDefinition[StoreName]>(
+    key: string,
+    record: Record,
+  ) => {
     const enhancedRecord = await executeConstraints(record);
 
     await store.setJSON(key, enhancedRecord);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { __constraints__, ...otherFields } = enhancedRecord;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { __constraints__, ...nextRecord } = enhancedRecord;
 
-    return otherFields as StoresDefinition[StoreName];
+    return nextRecord as Record;
   };
 
-  const update = async (key: string, record: Partial<StoresDefinition[StoreName]>) => {
+  const update = async <Record extends StoresDefinition[StoreName]>(
+    key: string,
+    record: Partial<Record>,
+  ) => {
     const enhancedRecord = await executeConstraints(record);
 
-    const previousRecord = (await store.get(key, {
+    const previousEnhancedRecord = (await store.get(key, {
       type: 'json',
-    })) as Nullable<NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>>;
+    })) as Nullable<NetlifyStoreEnhancedRecord<Record>>;
 
-    if (!previousRecord) {
+    if (!previousEnhancedRecord) {
       throw new NetlifyStoreError({
         status: 'error',
         statusCode: 400,
@@ -221,32 +196,32 @@ const createStoreApi = <
       });
     }
 
-    await cleanupStoreRecordConstraints(previousRecord);
+    await cleanupStoreRecordConstraints(previousEnhancedRecord);
 
-    const nextRecord = {
-      ...previousRecord,
+    const nextEnhancedRecord: NetlifyStoreEnhancedRecord<Record> = {
+      ...previousEnhancedRecord,
       ...enhancedRecord,
       // Merge constraints
       __constraints__: [
-        ...(previousRecord.__constraints__ ?? []),
+        ...(previousEnhancedRecord.__constraints__ ?? []),
         ...enhancedRecord.__constraints__,
       ],
     };
 
-    await store.setJSON(key, nextRecord);
+    await store.setJSON(key, nextEnhancedRecord);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { __constraints__, ...otherFields } = nextRecord;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { __constraints__, ...nextRecord } = nextEnhancedRecord;
 
-    return otherFields as StoresDefinition[StoreName];
+    return nextRecord as Record;
   };
 
-  const deleteRecord = async (key: string) => {
-    const record = (await store.get(key, {
+  const deleteRecord = async <Record extends StoresDefinition[StoreName]>(key: string) => {
+    const enhancedRecord = (await store.get(key, {
       type: 'json',
-    })) as Nullable<NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>>;
+    })) as Nullable<NetlifyStoreEnhancedRecord<Record>>;
 
-    if (!record) {
+    if (!enhancedRecord) {
       throw new NetlifyStoreError({
         status: 'error',
         statusCode: 400,
@@ -256,24 +231,29 @@ const createStoreApi = <
       });
     }
 
-    await Promise.all([cleanupStoreRecordConstraints(record), store.delete(key)]);
+    await Promise.all([cleanupStoreRecordConstraints(enhancedRecord), store.delete(key)]);
 
-    await storeConfig.onAfterDelete?.(record);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { __constraints__, ...record } = enhancedRecord;
+
+    await storeConfig.onAfterDelete?.(record as Record);
   };
 
-  const getList = async (
+  const getList = async <Record extends StoresDefinition[StoreName]>(
     listOptions?: Omit<ListOptions, 'paginate'>,
     options?: GetNetlifyStoreRecordsOptions,
   ) => {
-    const records = await getNetlifyStoreRecords<
-      NetlifyStoreEnhancedRecord<StoresDefinition[StoreName]>
-    >(store, listOptions, options);
+    const records = await getNetlifyStoreRecords<NetlifyStoreEnhancedRecord<Record>>(
+      store,
+      listOptions,
+      options,
+    );
 
-    return records.map(record => {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { __constraints__, ...otherFields } = record;
+    return records.map(enhancedRecord => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { __constraints__, ...record } = enhancedRecord;
 
-      return otherFields as StoresDefinition[StoreName];
+      return record as Record;
     });
   };
 
@@ -300,180 +280,3 @@ export const defineNetlifyStores = <StoresDefinition extends NetlifyStoresDefini
     {} as never,
   );
 };
-
-type NetlifyStores = {
-  users: UserRecord;
-  userShippingAddresses: UserShippingAddressRecord;
-  userBillingAddresses: UserBillingAddressRecord;
-  files: FileRecord;
-  measurements: MeasurementRecord;
-  manufacturers: ManufacturerRecord;
-  applications: ApplicationRecord;
-  datasheets: DatasheetRecord;
-  categories: CategoryRecord;
-  featureCategories: FeatureCategoryRecord;
-  features: FeatureRecord;
-  products: ProductRecord;
-  productFiles: ProductFileRecord;
-  productFeatures: ProductFeatureRecord;
-  orders: OrderRecord;
-  orderProducts: OrderProductRecord;
-};
-
-initFirebaseApp();
-
-export const netlifyStores = defineNetlifyStores<NetlifyStores>({
-  users: {
-    //
-  },
-  userShippingAddresses: {
-    constraints: [
-      {
-        type: 'foreignKey',
-        field: 'userId',
-        store: 'users',
-      },
-    ],
-  },
-  userBillingAddresses: {
-    constraints: [
-      {
-        type: 'foreignKey',
-        field: 'userId',
-        store: 'users',
-      },
-    ],
-  },
-  files: {
-    onAfterDelete: async fileRecord => {
-      const storage = getStorage();
-      const bucket = storage.bucket(FIREBASE_BUCKET_NAME);
-
-      const file = bucket.file(fileRecord.path);
-      await file.delete();
-    },
-  },
-  measurements: {
-    //
-  },
-  manufacturers: {
-    //
-  },
-  applications: {
-    //
-  },
-  datasheets: {
-    constraints: [
-      {
-        type: 'foreignKey',
-        field: 'fileId',
-        store: 'files',
-      },
-      {
-        type: 'foreignKey',
-        field: 'manufacturerId',
-        store: 'manufacturers',
-        isAllowEmpty: true,
-      },
-    ],
-  },
-  categories: {
-    constraints: [
-      {
-        type: 'unique',
-        fields: ['name'],
-      },
-    ],
-  },
-  featureCategories: {
-    constraints: [
-      {
-        type: 'unique',
-        fields: ['name'],
-      },
-    ],
-  },
-  features: {
-    constraints: [
-      {
-        type: 'foreignKey',
-        field: 'categoryId',
-        store: 'featureCategories',
-      },
-      {
-        type: 'foreignKey',
-        field: 'measurementId',
-        store: 'measurements',
-      },
-      {
-        type: 'unique',
-        fields: ['categoryId', 'name'],
-      },
-    ],
-  },
-  products: {
-    constraints: [
-      {
-        type: 'foreignKey',
-        field: 'categoryId',
-        store: 'categories',
-      },
-    ],
-  },
-  productFiles: {
-    constraints: [
-      {
-        type: 'foreignKey',
-        field: 'categoryId',
-        store: 'categories',
-      },
-      {
-        type: 'foreignKey',
-        field: ['categoryId', 'productId'],
-        store: 'products',
-      },
-      {
-        type: 'foreignKey',
-        field: 'fileId',
-        store: 'files',
-      },
-    ],
-  },
-  productFeatures: {
-    constraints: [
-      {
-        type: 'foreignKey',
-        field: ['categoryId', 'productId'],
-        store: 'products',
-      },
-      {
-        type: 'foreignKey',
-        field: 'featureId',
-        store: 'features',
-      },
-    ],
-  },
-  orders: {
-    constraints: [
-      {
-        type: 'foreignKey',
-        field: 'userId',
-        store: 'users',
-      },
-    ],
-  },
-  orderProducts: {
-    constraints: [
-      {
-        type: 'foreignKey',
-        field: ['userId', 'orderId'],
-        store: 'orders',
-      },
-      {
-        type: 'foreignKey',
-        field: ['categoryId', 'productId'],
-        store: 'products',
-      },
-    ],
-  },
-});

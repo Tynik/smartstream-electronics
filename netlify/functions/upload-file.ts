@@ -82,10 +82,11 @@ export const handler = createHandler(
       };
     }
 
-    const storage = getStorage();
-    const bucket = storage.bucket(FIREBASE_BUCKET_NAME);
+    const bucket = getStorage().bucket(FIREBASE_BUCKET_NAME);
 
-    const filePath = `${folder}/${uuidv4()}`;
+    const fileId = uuidv4();
+    const filePath = `${folder}/${fileId}`;
+
     const file = bucket.file(filePath);
 
     await file.save(data.file.data, {
@@ -98,7 +99,7 @@ export const handler = createHandler(
 
     const fileRecord: FileRecord = {
       url,
-      id: uuidv4(),
+      id: fileId,
       name: data.file.filename,
       type: data.file.type,
       path: filePath,

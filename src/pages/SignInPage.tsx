@@ -44,7 +44,9 @@ export const SignInPage = () => {
         },
       });
 
-      navigate(PROFILE_ROUTE_PATH);
+      const redirectPath = queryParams.get('redirect') || PROFILE_ROUTE_PATH;
+
+      navigate(decodeURIComponent(redirectPath));
     } catch (e) {
       handlerApiError(e);
     }

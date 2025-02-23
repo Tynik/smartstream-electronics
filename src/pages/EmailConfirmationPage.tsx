@@ -34,12 +34,10 @@ export const EmailConfirmationPage = () => {
   }, [data]);
 
   return (
-    <>
-      {error && (
-        <Alert variant="error">
-          <Text variant="body2">{error.data.error}</Text>
-        </Alert>
-      )}
-    </>
+    error && (
+      <Alert variant="error">
+        <Text variant="body2">{error.data.error}</Text>
+      </Alert>
+    )
   );
 };

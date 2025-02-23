@@ -1,3 +1,4 @@
+import type { DashCase } from '../netlify.types';
 import type {
   NetlifyStoreConstraintProcessor,
   NetlifyStoreConfigForeignKeyConstraint,
@@ -5,7 +6,6 @@ import type {
   NetlifyStoreConstraintType,
   NetlifyStoreName,
   NetlifyStoresDefinition,
-  DashCase,
   NetlifyStoreEnhancedRecord,
   NetlifyStoreRecord,
 } from './netlify-store';

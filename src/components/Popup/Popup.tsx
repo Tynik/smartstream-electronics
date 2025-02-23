@@ -51,6 +51,10 @@ export const Popup = ({
     }
   }, [isOpen]);
 
+  const closePopup = () => {
+    setIsOpen(false);
+  };
+
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -61,7 +65,7 @@ export const Popup = ({
       assert(popupElement, 'The `popupElement` must be set');
 
       if (!popupElement.contains(e.target as Node) && isOpen) {
-        setIsOpen(false);
+        closePopup();
       }
     };
 
@@ -98,7 +102,7 @@ export const Popup = ({
         <HoneyLazyContent isMount={isOpen} unmountDelay={POPUP_TRANSITION_EFFECT_DURATION_MS}>
           {typeof content === 'function'
             ? content({
-                closePopup: () => setIsOpen(false),
+                closePopup,
               })
             : content}
         </HoneyLazyContent>

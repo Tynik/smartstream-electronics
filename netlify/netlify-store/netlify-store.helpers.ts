@@ -33,6 +33,7 @@ export const getNetlifyStoreRecords = async <T>(
   const listResult = store.list({ paginate: true, ...listOptions });
 
   const keys: string[] = [];
+
   let itemsCollected = 0; // Track the number of items collected across pages
   let skippedItems = 0; // Track the number of items skipped to handle offset
 

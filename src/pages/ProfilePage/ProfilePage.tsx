@@ -55,13 +55,13 @@ export const ProfilePage = () => {
         )}
       </Panel>
 
-      <Panel title="Shipping Addesses">
+      <Panel title="Shipping Addresses">
         <HoneyList items={profile?.shippingAddresses} noContent="Not set">
           {shippingAddress => <Text variant="body2">{shippingAddress.line1}</Text>}
         </HoneyList>
       </Panel>
 
-      <Panel title="Billing Addesses">
+      <Panel title="Billing Addresses">
         <HoneyList items={profile?.billingAddresses} noContent="Not set">
           {billingAddress => <Text variant="body2">{billingAddress.line1}</Text>}
         </HoneyList>

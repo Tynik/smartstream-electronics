@@ -2,7 +2,7 @@ import type { Handler, HandlerResponse, HandlerEvent, HandlerContext } from '@ne
 
 import type { Nullable } from './netlify.types';
 import { URL, NETLIFY_EMAILS_SECRET, SITE_DOMAIN } from './netlify.constants';
-import { NetlifyStoreError } from './netlify-store/netlify-store-errors';
+import { NetlifyStoreError } from './netlify-store';
 
 type HTTPMethod = 'POST' | 'GET' | 'OPTIONS' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -92,6 +92,7 @@ const createResponse = <Data>(
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': allowMethods?.join(', ') ?? '*',
+    'Content-Type': 'application/json',
     ...headers,
     ...(cookie
       ? {

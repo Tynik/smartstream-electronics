@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import type { Profile, NetlifyRequestResponse } from '~/api';
 import { PROFILE_QUERY_KEY, SIGN_IN_ROUTE_PATH } from '~/constants';
+import { assert, getCookieValue } from '~/helpers';
 import { getProfile, netlifyRequest } from '~/api';
-import { getCookieValue } from '~/helpers';
 
 type AppContextValue = {
   isOpenMenu: boolean;
@@ -24,6 +24,7 @@ type AppProviderProps = {
 
 export const AppProvider = ({ children }: AppProviderProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [isOpenMenu, setIsOpenMenu] = useState(true);
 
@@ -38,7 +39,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         const response = e as NetlifyRequestResponse;
 
         if (response.status !== 'ok') {
-          navigate(SIGN_IN_ROUTE_PATH);
+          const redirectPath = encodeURIComponent(location.pathname + location.search);
+
+          navigate(`${SIGN_IN_ROUTE_PATH}?redirect=${redirectPath}`);
 
           return Promise.reject(response);
         }
@@ -67,12 +70,12 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       isOpenMenu,
       toggleMenu: () => setIsOpenMenu(!isOpenMenu),
       profile,
+      isProfileLoading,
       refetchProfile: async () => {
         await refetchProfile();
       },
-      isProfileLoading,
     }),
-    [isOpenMenu, profile, refetchProfile, isProfileLoading],
+    [isOpenMenu, profile, isProfileLoading, refetchProfile],
   );
 
   return <AppContext.Provider value={contextValue}>{children(contextValue)}</AppContext.Provider>;
@@ -80,9 +83,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
 export const useCurrentApp = () => {
   const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('Could not find current App context');
-  }
+  assert(context, 'Could not find current App context');
 
   return context;
 };

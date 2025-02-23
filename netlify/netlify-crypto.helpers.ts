@@ -30,6 +30,5 @@ export const hashPassword = (password: string): string => {
   return crypto.createHmac('sha256', SECRET_KEY).update(password).digest('hex');
 };
 
-export const createHexHash = (data: BinaryLike): string => {
-  return crypto.createHash('sha256').update(data).digest('hex');
-};
+export const createHexHash = (data: BinaryLike): string =>
+  crypto.createHash('sha256').update(data).digest('hex');

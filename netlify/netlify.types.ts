@@ -2,13 +2,21 @@ import type Stripe from 'stripe';
 
 export type Nullable<T> = T | null;
 
+export type NullableStringKeys<T> = {
+  [K in keyof T]: T[K] extends Nullable<string> ? K : never;
+}[keyof T];
+
+export type DashCase<T extends string> = T extends `${infer First}-${infer Rest}`
+  ? `${Lowercase<First>}-${DashCase<Rest>}`
+  : Lowercase<T>;
+
 export type UserId = string;
 
 export type StripeCustomerId = Stripe.Customer['id'];
 
-export type UserShippingAddressId = string;
+export type ShippingAddressId = string;
 
-export type UserBillingAddressId = string;
+export type BillingAddressId = string;
 
 export type FileId = string;
 
@@ -67,8 +75,8 @@ export type UserRecord = {
   updated: Nullable<number>;
 };
 
-export type UserShippingAddressRecord = {
-  id: UserShippingAddressId;
+export type ShippingAddressRecord = {
+  id: ShippingAddressId;
   userId: UserId;
   line1: string;
   line2: Nullable<string>;
@@ -77,8 +85,8 @@ export type UserShippingAddressRecord = {
   note: Nullable<string>;
 };
 
-export type UserBillingAddressRecord = {
-  id: UserBillingAddressId;
+export type BillingAddressRecord = {
+  id: BillingAddressId;
   userId: UserId;
   line1: string;
   line2: Nullable<string>;
@@ -174,8 +182,8 @@ export type ProductFeatureRecord = {
 export type OrderRecord = {
   id: OrderId;
   userId: UserId;
-  shippingAddressId: UserShippingAddressId;
-  billingAddressId: Nullable<UserBillingAddressId>;
+  shippingAddressId: ShippingAddressId;
+  billingAddressId: Nullable<BillingAddressId>;
   status: OrderStatus;
   totalPrice: number;
   created: number;
